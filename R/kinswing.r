@@ -26,13 +26,5 @@
 #'
 #' @docType package
 #' @name KinSwingR
-#'
-### functions used:
-#' @importFrom data.table data.table
-#' @importFrom BiocParallel bplapply
-#' @importFrom BiocParallel MulticoreParam
-#' @importFrom sqldf sqldf
-#' @importFrom stats setNames
-#' @importFrom stats sd
 #' 
 NULL

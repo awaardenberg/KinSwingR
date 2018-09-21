@@ -5,10 +5,10 @@
 \title{Master function for computing Swing statistic}
 \usage{
 swing.master(input.data = NULL, kinase.table = NULL, wild.card = "_",
-  substrate.length = 15, remove.center = FALSE, background = "random",
-  n = 100, force.trim = FALSE, seed = 1234, pseudo.count = 1,
-  p.cut.pwm = 0.05, p.cut.fc = 0.05, permutations = 100,
-  verbose = FALSE, threads = 1)
+  substrate.length = 15, remove.center = FALSE,
+  background = "random", n = 100, force.trim = FALSE, seed = 1234,
+  pseudo.count = 1, p.cut.pwm = 0.05, p.cut.fc = 0.05,
+  permutations = 100, verbose = FALSE, threads = 1)
 }
 \arguments{
 \item{input.data}{A data.frame of phoshopeptide data derived from a phosphoproteome experiment.
@@ -85,9 +85,9 @@ sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 1000),]
 
 ## Run Swing analysis:
 ## For this example, permutations are set to 10 for speed.
-swing.out <- swing.master(kinase.table = sample.pwm, 
+swing.out <- swing.master(kinase.table = sample.pwm,
                           input.data = annotated.data,
-                          threads = 4, 
+                          threads = 4,
                           permutations = 10)
 
 }

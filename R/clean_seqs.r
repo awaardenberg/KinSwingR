@@ -58,6 +58,9 @@
 #' @return A data.table with the peptides extracted from the annotation column
 #'
 #' @export clean.annotation
+#' @importFrom data.table data.table
+#' @importFrom sqldf sqldf
+
 
 clean.annotation <- function(input.data = NULL, 
                              annotation.delimiter = "|", 
@@ -85,14 +88,14 @@ clean.annotation <- function(input.data = NULL,
   #extract the annotation from the table:
   data.annotation <- as.character(input.data[,1])
   #1. obtain sequences of interest
-  seq.list <- strsplit(data.annotation, annotation.delimiter, fixed=T)
+  seq.list <- strsplit(data.annotation, annotation.delimiter, fixed=TRUE)
   #get the nth element (seq.number) from the list (which contains the sequences):
   seqs <- sapply(seq.list, `[`, seq.number)
   #2. multi-site assignment
-  seq.list <- strsplit(as.character(seqs), multi.site.delimiter, fixed=T)
+  seq.list <- strsplit(as.character(seqs), multi.site.delimiter, fixed=TRUE)
   seqs <- unlist(seq.list)
   #3. multi-gene assignment
-  seq.list <- strsplit(as.character(seqs), multi.protein.delimiter, fixed=T)
+  seq.list <- strsplit(as.character(seqs), multi.protein.delimiter, fixed=TRUE)
   seqs <- unlist(seq.list)
   #4. keep unique sequences for remapping
   seqs <- unique(seqs)

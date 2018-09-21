@@ -137,7 +137,7 @@ score.pwm <-
     #SET AS AN OPTION:
     pwm <- pwm[!rownames(pwm) %in% c(wild.card), ]
     #2. PPM calculation
-    pwm <- (pwm + pseudo) / (apply(pwm, 2, sum, na.rm = T))
+    pwm <- (pwm + pseudo) / (apply(pwm, 2, sum, na.rm = TRUE))
     #3. Generate Position Weight Matrix
     pwm <- log(pwm / (1 / nrow(pwm)))
     return(pwm)

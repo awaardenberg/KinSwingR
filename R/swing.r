@@ -64,6 +64,11 @@
 #' @return A data.table of swing scores.
 #'
 #' @export swing
+#' @importFrom BiocParallel bplapply
+#' @importFrom BiocParallel MulticoreParam
+#' @importFrom stats setNames
+#' @importFrom stats sd
+
 
 swing <-
   function(input.data = NULL,
@@ -260,7 +265,7 @@ swing.score <- function(data.merge, pwm.in, pseudo.count = 1, permute=FALSE, n=1
   p.n.all$swing <-
     (p.n.all$swing.raw - mean(p.n.all$swing.raw, na.rm = TRUE)) / sd(p.n.all$swing.raw, na.rm = TRUE)
   #order results and return table::
-  p.n.all <- p.n.all[order(p.n.all$swing, decreasing = T), ]
+  p.n.all <- p.n.all[order(p.n.all$swing, decreasing = TRUE), ]
 
   # for permuted tables, return the scores in
   # data.table format for merge function!

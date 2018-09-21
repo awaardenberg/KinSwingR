@@ -42,7 +42,7 @@
 #' ## import data
 #' data(example_phosphoproteome)
 #' data(phosphositeplus_human)
-#' 
+#'
 #' ## clean up the annotations
 #' ## sample 100 data points for demonstration
 #' sample.data <- head(example_phosphoproteome, 100)
@@ -51,62 +51,85 @@
 #' ## sample the kinase-substrate data for demonstration:
 #' set.seed(1)
 #' sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 1000),]
-#' 
+#'
 #' ## Run Swing analysis:
 #' ## For this example, permutations are set to 10 for speed.
-#' swing.out <- swing.master(kinase.table = sample.pwm, 
+#' swing.out <- swing.master(kinase.table = sample.pwm,
 #'                           input.data = annotated.data,
-#'                           threads = 4, 
+#'                           threads = 4,
 #'                           permutations = 10)
 #'
 #' @return data.frame of swing scores and p-values (if network permutation conducted)
 #'
 #' @export swing.master
 
-swing.master <- function(input.data = NULL, 
-                         kinase.table = NULL, 
-                         wild.card = "_", 
+swing.master <- function(input.data = NULL,
+                         kinase.table = NULL,
+                         wild.card = "_",
                          substrate.length = 15,
-                         remove.center = FALSE, 
-                         background = "random", 
-                         n = 100, 
+                         remove.center = FALSE,
+                         background = "random",
+                         n = 100,
                          force.trim = FALSE,
-                         seed = 1234, 
+                         seed = 1234,
                          pseudo.count = 1,
-                         p.cut.pwm = 0.05, 
+                         p.cut.pwm = 0.05,
                          p.cut.fc = 0.05,
-                         permutations = 100, 
-                         verbose = FALSE, 
-                         threads = 1){
-  if(verbose){
+                         permutations = 100,
+                         verbose = FALSE,
+                         threads = 1) {
+  if (verbose) {
     cat("[Step1/3] : Building PWMs\n")
   }
-
+  
   #1. build PWMs
-	pwm.out <- build.pwm(kinase.table=kinase.table, wild.card=wild.card,
-	                     substrate.length=substrate.length, remove.center=remove.center,
-	                     verbose=verbose)
-
-	if(verbose){
-	  cat("[Step2/3] : Scoring PWM matches to peptide sequences\n")
-	}
-
-	#2. Score PWM matches to peptide sequences
-	scores.out <- score.sequences(input.data, background=background, pwm.in=pwm.out, n=n,
-	                              force.trim=force.trim, seed=seed, verbose=verbose, threads=threads)
-
-	if(verbose){
-	  cat("[Step3/3] : Computing Swing scores\n")
-	}
-
-	#3. Generate the swing scores:
-	swing.out <- swing(input.data=input.data, pwm.in=pwm.out, pwm.scores=scores.out,
-	                   pseudo.count=pseudo.count, p.cut.pwm=p.cut.pwm, p.cut.fc=p.cut.fc,
-	                   permutations=permutations, verbose=verbose, threads=threads)
-
-	if(verbose){
-	  cat("[COMPLETE]\n")
-	}
-
-return(swing.out)
+  pwm.out <-
+    build.pwm(
+      kinase.table = kinase.table,
+      wild.card = wild.card,
+      substrate.length = substrate.length,
+      remove.center = remove.center,
+      verbose = verbose
+    )
+  
+  if (verbose) {
+    cat("[Step2/3] : Scoring PWM matches to peptide sequences\n")
+  }
+  
+  #2. Score PWM matches to peptide sequences
+  scores.out <-
+    score.sequences(
+      input.data,
+      background = background,
+      pwm.in = pwm.out,
+      n = n,
+      force.trim = force.trim,
+      seed = seed,
+      verbose = verbose,
+      threads = threads
+    )
+  
+  if (verbose) {
+    cat("[Step3/3] : Computing Swing scores\n")
+  }
+  
+  #3. Generate the swing scores:
+  swing.out <-
+    swing(
+      input.data = input.data,
+      pwm.in = pwm.out,
+      pwm.scores = scores.out,
+      pseudo.count = pseudo.count,
+      p.cut.pwm = p.cut.pwm,
+      p.cut.fc = p.cut.fc,
+      permutations = permutations,
+      verbose = verbose,
+      threads = threads
+    )
+  
+  if (verbose) {
+    cat("[COMPLETE]\n")
+  }
+  
+  return(swing.out)
 }

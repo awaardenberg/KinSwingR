@@ -4,9 +4,9 @@
 \alias{score.sequences}
 \title{Score substrate sequences for matches to kinase Position Weight Matrices (PWMs)}
 \usage{
-score.sequences(input.data = NULL, pwm.in = NULL, background = "random",
-  n = 1000, force.trim = FALSE, seed = 1234, verbose = FALSE,
-  threads = 1)
+score.sequences(input.data = NULL, pwm.in = NULL,
+  background = "random", n = 1000, force.trim = FALSE, seed = 1234,
+  verbose = FALSE, threads = 1)
 }
 \arguments{
 \item{input.data}{A data.frame of phoshopeptide data. Must contain 4 columns and the following

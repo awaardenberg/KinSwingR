@@ -52,6 +52,8 @@
 #'  reproducibility: pwm.substrate.scores$background
 #'
 #' @export score.sequences
+#' @importFrom BiocParallel bplapply
+#' @importFrom BiocParallel MulticoreParam
 
 score.sequences <- function(input.data = NULL,
                             pwm.in = NULL,

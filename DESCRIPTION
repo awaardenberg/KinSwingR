@@ -1,7 +1,7 @@
 Package: KinSwingR
 Type: Package
 Title: KinSwingR: network-based kinase activity prediction
-Version: 0.99.3
+Version: 0.99.4
 Authors@R: person("Ashley J.", "Waardenberg", email =
     "a.waardenberg@gmail.com", role=c("aut", "cre"))
 Description: KinSwingR integrates phosphosite data derived from mass-spectrometry
@@ -16,9 +16,13 @@ Depends:
 Imports:
     data.table,
     BiocParallel,
-    sqldf
-biocViews: Proteomics
-RoxygenNote: 6.0.1
+    sqldf,
+    stats
+biocViews: 
+    Proteomics,
+    SequenceMatching, 
+    Network
+RoxygenNote: 6.1.0
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

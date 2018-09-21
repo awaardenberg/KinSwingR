@@ -4,9 +4,9 @@
 \alias{build.pwm}
 \title{Generate Position Weight Matrices (PWMs)}
 \usage{
-build.pwm(kinase.table = NULL, wild.card = "_", substrate.length = 15,
-  substrates.n = 10, pseudo = 0.01, remove.center = FALSE,
-  verbose = FALSE)
+build.pwm(kinase.table = NULL, wild.card = "_",
+  substrate.length = 15, substrates.n = 10, pseudo = 0.01,
+  remove.center = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{kinase.table}{A data.frame of substrate sequences and kinase names. Format of data must
