@@ -1,0 +1,24 @@
+Package: KinSwingR
+Type: Package
+Title: KinSwingR: network-based kinase activity prediction
+Version: 0.99.3
+Authors@R: person("Ashley J.", "Waardenberg", email =
+    "a.waardenberg@gmail.com", role=c("aut", "cre"))
+Description: KinSwingR integrates phosphosite data derived from mass-spectrometry
+    data and kinase-substrate predictions to predict kinase activity. Several functions
+    allow the user to build PWM models of kinase-subtrates, statistically infer PWM:substrate
+    matches, and integrate these data to infer kinase activity.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5)
+Imports:
+    data.table,
+    BiocParallel,
+    sqldf
+biocViews: Proteomics
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
