@@ -13,7 +13,7 @@ devtools::install_github("awaardenberg/KinSwingR")
 
 ## Examples
 
-To run KinSwingR, load the library and follow the examples in the vignette. The KinSwingR vignette can also be viewed by clicking the following link: <a href="http://htmlpreview.github.io/?https://github.com/awaardenberg/KinSwingR/blob/master/inst/doc/KinSwingR.html" target="_blank">KinSwingR Vignette</a>
+To run KinSwingR, load the library and follow the examples in the vignette.
 
 ```R
 library(KinSwingR)
