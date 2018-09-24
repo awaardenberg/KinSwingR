@@ -1,8 +1,8 @@
 #' Example phosphoproteome.
 #'
 #' A dataset containing annotated subtrate sequences derived
-#' from XXX. See original publication for more 
-#' details: Engholm-Keller & Waardenberg AJ et al. 
+#' from XXX. See original publication for more
+#' details: Engholm-Keller & Waardenberg AJ et al.
 #'
 #' @format A data frame with 6215 rows and 4 variables:
 #' \describe{

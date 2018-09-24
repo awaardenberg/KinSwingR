@@ -17,7 +17,7 @@ example_phosphoproteome
 }
 \description{
 A dataset containing annotated subtrate sequences derived
-from XXX. See original publication for more 
+from XXX. See original publication for more
 details: Engholm-Keller & Waardenberg AJ et al.
 }
 \keyword{datasets}

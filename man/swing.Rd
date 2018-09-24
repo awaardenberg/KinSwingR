@@ -10,9 +10,9 @@ swing(input.data = NULL, pwm.in = NULL, pwm.scores = NULL,
 }
 \arguments{
 \item{input.data}{A data.frame of phoshopeptide data. Must contain 4 columns
-and the following format must be adhered to. Column 1 - Annotation, Column 2 -
-centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 - p-value [0-1].
-This must be the same dataframe used in score.sequences()}
+and the following format must be adhered to. Column 1 - Annotation, Column 2
+ - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
+ - p-value [0-1]. This must be the same dataframe used in score.sequences()}
 
 \item{pwm.in}{List of PWMs created using build.pwm()}
 
@@ -28,15 +28,16 @@ kinase-substrate enrichment. Default: "0.05"}
 \item{p.cut.fc}{Significance level for determining a significant level of
 Fold-change in the phosphoproteomics data. Default: "0.05"}
 
-\item{permutations}{Number of permutations to perform. This will shuffle the kinase-subtrate
-edged of the network n times. To not perform permutations and only generate the scores,
-set permutations=1 or permutations=FALSE. Default: "1000"}
+\item{permutations}{Number of permutations to perform. This will shuffle the 
+kinase-subtrate edges of the network n times. To not perform permutations and
+ only generate the scores, set permutations=1 or permutations=FALSE. Default:
+  "1000"}
 
-\item{seed}{This is for reproducible results for permutation testing.
-To not use a set seed=NULL. Default: "1234"}
+\item{seed}{This is for reproducible results for permutation testing. To not 
+use a set seed=NULL. Default: "1234"}
 
-\item{verbose}{Turn verbosity on/off. To turn on, verbose=TRUE. Options are: "TRUE, FALSE".
-Default=FALSE}
+\item{verbose}{Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
+"TRUE, FALSE". Default=FALSE}
 
 \item{threads}{Number of processing cores to use. Default: "1"}
 }
@@ -47,9 +48,10 @@ A data.table of swing scores.
 This function integrates the kinase-substrate predictions,
 directionality of phosphopeptide fold change and signficance to assess
 local connectivity (swing) of kinase-substrate networks. The final score
-is a normalised and weighted score of predicted kinase activity. If permutations
-are selected, network node:edges are permutated. P-values will be calculated for
-both ends of the distribution of swing scores (positive and negative swing scores).
+is a normalised and weighted score of predicted kinase activity. If 
+permutations are selected, network node:edges are permutated. P-values will 
+be calculated for both ends of the distribution of swing scores (positive and
+ negative swing scores).
 }
 \examples{
 ## import data
@@ -63,23 +65,24 @@ annotated.data <- clean.annotation(input.data=sample.data)
 
 ## build the PWM models:
 set.seed(1)
-sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 1000),] 
+sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
+1000),]
 kinase.pwm.models <- build.pwm(sample.pwm)
 
 ## score the PWM - substrate matches
 ## Using a "random" background, to calculate the p-value of the matches
 ## Using n=10 for demonstration
 
-pwm.substrate.scores <- score.sequences(input.data = annotated.data, 
+pwm.substrate.scores <- score.sequences(input.data = annotated.data,
                                        pwm.in = kinase.pwm.models,
-                                       background = "random", 
-                                       n = 10, 
+                                       background = "random",
+                                       n = 10,
                                        threads = 4)
 
 ## Use the pwm.scores and annotated data to predict kinase activity.
 ## This will permute the network node and edges 10 times for demonstration.
-swing.output <- swing(input.data = annotated.data, 
-                      pwm.in = kinase.pwm.models, 
+swing.output <- swing(input.data = annotated.data,
+                      pwm.in = kinase.pwm.models,
                       pwm.scores = pwm.substrate.scores,
                       permutations = 10,
                       threads = 4)

@@ -57,7 +57,17 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+```{r setup, include = FALSE}
+# setting of some global variables
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  #comment = "#>",
+  library(KinSwingR),
+  data(example_phosphoproteome),
+  data(phosphositeplus_human)
+)
+```
+  
 # Introduction to KinSwing
 
 KinSwingR aims to predict kinase activity from phoshoproteomics data. It implements the alogorithm described in: @Kasper2018 and @Waardenberg2018 (described in greater detail below). KinSwingR predicts kinase activity by integrating kinase-substrate predictions and the fold change and signficance of change for peptide sequences obtained from phospho-proteomics studies. The score is based on the network connectivity of kinase-substrate networks and is weighted for the number of substrates as well as the size of the local network. P-values are provided to assess the significance of the KinSwing scores, which are determined through random permuations of the overall kinase-substrate network.
@@ -81,37 +91,16 @@ Detailed information for each of these functions can be accessed using the ```?`
 
 We will now consider an example dataset to predict kinase activity. Kinase-substrate sequences and phosphoproteomics data are provided as example data in the KinSwingR package.
 
-Begin by loading the KinSwingR library:
-```{r eval=FALSE}
+Begin by loading the KinSwingR library and the two data libraries included in the package.
+```{r echo=TRUE}
 library(KinSwingR)
-```
-and the two data libraries included in the package:
-```{r eval=FALSE}
 data(example_phosphoproteome)
 data(phosphositeplus_human)
-```
-View the datasets:
-```{r eval=FALSE}
+
+# View the datasets:
 head(example_phosphoproteome)
 
-##                              annotation peptide          fc        pval
-## 1      A0A096MJ61|NA|89|PRRVRNLSAVLAART      NA -0.08377538 0.218815889
-## 2 A0A096MJB0|Adcy9|1296|LDKASLGSDDGAQTK      NA  0.03707147 0.751069301
-## 3  A0A096MJB0|Adcy9|610|PRGQGTASPGSVSDL      NA -0.06885408 0.594494965
-## 4  A0A096MJB0|Adcy9|613|QGTASPGSVSDLAQT      NA -0.29418446 0.002806832
-## 5   A0A096MJN4|Sept4|49|ILEPRPQSPDLCDDD      NA  0.09097982 0.078667811
-## 6   A0A096MJN4|Sept4|81|FCPPAPLSPSSRPRS      NA -0.12246661 0.078619010
-```
-```{r eval=FALSE}
 head(phosphositeplus_human)
-##      kinase    substrate        
-## [1,] "EIF2AK1" "MILLSELSRRRIRSI"
-## [2,] "EIF2AK1" "RILLSELSR______"
-## [3,] "EIF2AK1" "IEGMILLSELSRRRI"
-## [4,] "PRKCD"   "MKKKDEGSYDLGKKP"
-## [5,] "PRKCD"   "FPLRKTASEPNLKVR"
-## [6,] "PRKCD"   "PLLARSPSTNRKYPP"
-
 ```
 
 ## Extracting peptides for analysis
@@ -123,7 +112,7 @@ In the example dataset, ```example_phosphoproteome```, the peptide sequence is t
 
 Calling ```clean.annotation()``` will produce a new table with the unique combinations of peptide sequences extracted from the annotation column into the peptide column:
 
-```{r eval=FALSE}
+```{r echo=TRUE}
 annotated.data <- clean.annotation(input.data = example_phosphoproteome, 
                                    annotation.delimiter = "|",
                                    multi.protein.delimiter = ":", 
@@ -134,37 +123,22 @@ annotated.data <- clean.annotation(input.data = example_phosphoproteome,
                                    replace.with = "_")
 
 head(annotated.data)
-##                              annotation         peptide          fc        pval
-## 1      A0A096MJ61|NA|89|PRRVRNLSAVLAART PRRVRNLSAVLAART -0.08377538 0.218815889
-## 2 A0A096MJB0|Adcy9|1296|LDKASLGSDDGAQTK LDKASLGSDDGAQTK  0.03707147 0.751069301
-## 3  A0A096MJB0|Adcy9|610|PRGQGTASPGSVSDL PRGQGTASPGSVSDL -0.06885408 0.594494965
-## 4  A0A096MJB0|Adcy9|613|QGTASPGSVSDLAQT QGTASPGSVSDLAQT -0.29418446 0.002806832
-## 5   A0A096MJN4|Sept4|49|ILEPRPQSPDLCDDD ILEPRPQSPDLCDDD  0.09097982 0.078667811
-## 6   A0A096MJN4|Sept4|81|FCPPAPLSPSSRPRS FCPPAPLSPSSRPRS -0.12246661 0.078619010
+
 ```
 
-
 ## Build Position Weight Matrices (PWMs)
-
 The first step to inferring kinase activity, is to build Position Weight Matrices (PWMs) for kinases. This can be done using ```build.pwm()``` for any table containing centered substrate peptide sequences for a list of kinases. The example data ```data(phosphositeplus_human)``` indicates the required format for building PWM models.
 
 To generate the PWMs:
-```{r eval=FALSE}
+```{r echo=TRUE}
 pwms <- build.pwm(phosphositeplus_human)
 ```
 
 This will build the PWM models, accessible as ```PWM$pwm``` and list the number of substrate sequences used to build each PWM, accesible as ```PWM$kinase```.
 
 To view the list of kinases and the number of sequences used:
-```{r eval=FALSE}
+```{r echo=TRUE}
 head(pwms$kinase)
-##    kinase   n
-## 1 EIF2AK1   3
-## 2   PRKCD 138
-## 3    PIM2  10
-## 4  CAMK2A 189
-## 5 CSNK2A1 590
-## 6    VRK2   9
 ```
 
 ## Score PWM matches against peptide sequences
@@ -185,7 +159,7 @@ In summary, ```score.sequences()``` scores each input sequence for a match again
 
 ## Predict kinase activity using swing()
 
-Having built a kinase-substrate network, ```swing()``` then integrates the kinase-subtrate predictions, directionality and significance of phosphopeptide fold change to assess the local connectivity (or swing) of kinase-substrate networks. The final score is a normalised score of predicted kinase activity weighted for the number of substrates used in the PWM model and number of peptides in the local kinase-substrate network. By default, this will permute the network 1000 times. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading.
+Having built a kinase-substrate network, ```swing()``` then integrates the kinase-substrate predictions, directionality and significance of phosphopeptide fold change to assess local connectivity (or swing) of kinase-substrate networks. The final score is a normalised score of predicted kinase activity that is weighted for the number of substrates used in the PWM model and number of peptides in the local kinase-substrate network. By default, this will permute the network 1000 times. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading.
 
 ```{r eval=FALSE}
 swing.out <- swing(input.data = annotated.data, 
@@ -195,14 +169,21 @@ swing.out <- swing(input.data = annotated.data,
 
 # This will produce two tables, one is a network for use with e.g. Cytoscape and the other is the scores. To access the scores:
 
-head(swing$scores)
-##      kinase pos neg all        pk        nk swing.raw   n    swing   p.greater   p.less
-## 78  CSNK2A1  12   6  18 0.6666667 0.3333333 12.590843 590 2.661780 0.009990010 0.989011
-## 33   CAMK2A  42  24  66 0.6363636 0.3636364 12.078387 189 2.577006 0.006993007 0.988012
-## 276   PRKG2  34  15  49 0.6938776 0.3061224  8.466674  15 1.979529 0.000999001 0.999001
-## 130   IKBKB  26  15  41 0.6341463 0.3658537  7.991465  52 1.900917 0.015984016 0.984016
-## 133    INSR  14   9  23 0.6086957 0.3913043  5.500727  52 1.488880 0.045954046 0.953047
-## 111     FGR  21  10  31 0.6774194 0.3225806  5.434642   8 1.477948 0.002997003 0.995005
+head(swing.out$scores)
+##      kinase pos neg all        pk        nk swing.raw   n    swing
+## 35  CSNK2A1  12   6  18 0.6666667 0.3333333 12.590843 590 2.191622
+## 16   CAMK2A  42  24  66 0.6363636 0.3636364 12.078387 189 2.129686
+## 129   PRKG2  34  15  49 0.6938776 0.3061224  8.466674  15 1.693169
+## 58    IKBKB  26  15  41 0.6341463 0.3658537  7.991465  52 1.635735
+## 61     INSR  14   9  23 0.6086957 0.3913043  5.500727  52 1.334701
+## 125   PRKD1  48  36  84 0.5714286 0.4285714  5.364965  67 1.318292
+##       p.greater    p.less
+## 35  0.023976024 0.9710290
+## 16  0.007992008 0.9900100
+## 129 0.000999001 0.9990010
+## 58  0.009990010 0.9840160
+## 61  0.041958042 0.9520480
+## 125 0.052947053 0.9400599
 ```
 
 The outputs of this table indicate the following:
