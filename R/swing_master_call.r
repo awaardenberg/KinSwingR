@@ -64,7 +64,8 @@
 #' swing.out <- swing.master(kinase.table = sample.pwm,
 #'                           input.data = annotated.data,
 #'                           threads = 4,
-#'                           permutations = 10)
+#'                           permutations = 10,
+#'                           n = 100)
 #'
 #' @return data.frame of swing scores and p-values (if network permutation 
 #' conducted)
