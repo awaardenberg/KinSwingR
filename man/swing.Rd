@@ -6,7 +6,7 @@
 \usage{
 swing(input.data = NULL, pwm.in = NULL, pwm.scores = NULL,
   pseudo.count = 1, p.cut.pwm = 0.05, p.cut.fc = 0.05,
-  permutations = 1000, seed = 1234, verbose = FALSE, threads = 1)
+  permutations = 1000, verbose = FALSE, threads = 1)
 }
 \arguments{
 \item{input.data}{A data.frame of phoshopeptide data. Must contain 4 columns
@@ -32,9 +32,6 @@ Fold-change in the phosphoproteomics data. Default: "0.05"}
 kinase-subtrate edges of the network n times. To not perform permutations and
  only generate the scores, set permutations=1 or permutations=FALSE. Default:
   "1000"}
-
-\item{seed}{This is for reproducible results for permutation testing. To not 
-use a set seed=NULL. Default: "1234"}
 
 \item{verbose}{Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 "TRUE, FALSE". Default=FALSE}
@@ -64,7 +61,7 @@ sample.data <- head(example_phosphoproteome, 100)
 annotated.data <- clean.annotation(input.data=sample.data)
 
 ## build the PWM models:
-set.seed(1)
+set.seed(1234)
 sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
 1000),]
 kinase.pwm.models <- build.pwm(sample.pwm)
@@ -72,7 +69,8 @@ kinase.pwm.models <- build.pwm(sample.pwm)
 ## score the PWM - substrate matches
 ## Using a "random" background, to calculate the p-value of the matches
 ## Using n=10 for demonstration
-
+## set.seed for reproducibility
+set.seed(1234)
 pwm.substrate.scores <- score.sequences(input.data = annotated.data,
                                        pwm.in = kinase.pwm.models,
                                        background = "random",
@@ -81,6 +79,8 @@ pwm.substrate.scores <- score.sequences(input.data = annotated.data,
 
 ## Use the pwm.scores and annotated data to predict kinase activity.
 ## This will permute the network node and edges 10 times for demonstration.
+## set.seed for reproducibility
+set.seed(1234)
 swing.output <- swing(input.data = annotated.data,
                       pwm.in = kinase.pwm.models,
                       pwm.scores = pwm.substrate.scores,

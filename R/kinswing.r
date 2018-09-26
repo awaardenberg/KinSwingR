@@ -6,8 +6,7 @@
 #' KinSwingR is a score that is normalised and weighted for prediction of kinase
 #'  activity.
 #'
-#' This is a development version of KinSwingR Contact a.waardenberg@gmail.com 
-#' for questions relating to functionality.
+#' Contact a.waardenberg@gmail.com for questions relating to functionality.
 #'
 #' @section build.pwm function:
 #' Builds PWMs for kinases from a table of kinases and known substrate 
@@ -19,11 +18,6 @@
 #' @section swing function:
 #' Integrates kinase PWMs matches against peptide seqeuences and directionality 
 #' as well as significance of peptides for prediction of kinase activity.
-#'
-#' @section swing.master function:
-#' One master function for computing the swing statistic in one command. Run 
-#' clean.annotation() first, if peptides need to be extracted from the 
-#' annotations.
 #'
 #' @section clean.annotation function:
 #' Function for extracting peptides from multimapped data

@@ -24,8 +24,6 @@
 #' kinase-subtrate edges of the network n times. To not perform permutations and
 #'  only generate the scores, set permutations=1 or permutations=FALSE. Default:
 #'   "1000"
-#' @param seed This is for reproducible results for permutation testing. To not 
-#' use a set seed=NULL. Default: "1234"
 #' @param verbose Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 #' "TRUE, FALSE". Default=FALSE
 #' @param threads Number of processing cores to use. Default: "1"
@@ -41,7 +39,7 @@
 #' annotated.data <- clean.annotation(input.data=sample.data)
 #'
 #' ## build the PWM models:
-#' set.seed(1)
+#' set.seed(1234)
 #' sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
 #' 1000),]
 #' kinase.pwm.models <- build.pwm(sample.pwm)
@@ -49,7 +47,8 @@
 #' ## score the PWM - substrate matches
 #' ## Using a "random" background, to calculate the p-value of the matches
 #' ## Using n=10 for demonstration
-#'
+#' ## set.seed for reproducibility
+#' set.seed(1234)
 #' pwm.substrate.scores <- score.sequences(input.data = annotated.data,
 #'                                        pwm.in = kinase.pwm.models,
 #'                                        background = "random",
@@ -58,6 +57,8 @@
 #'
 #' ## Use the pwm.scores and annotated data to predict kinase activity.
 #' ## This will permute the network node and edges 10 times for demonstration.
+#' ## set.seed for reproducibility
+#' set.seed(1234)
 #' swing.output <- swing(input.data = annotated.data,
 #'                       pwm.in = kinase.pwm.models,
 #'                       pwm.scores = pwm.substrate.scores,
@@ -71,7 +72,7 @@
 #' @importFrom BiocParallel MulticoreParam
 #' @importFrom stats setNames
 #' @importFrom stats sd
-
+#' @importFrom data.table melt.data.table
 
 swing <-
   function(input.data = NULL,
@@ -81,7 +82,6 @@ swing <-
            p.cut.pwm = 0.05,
            p.cut.fc = 0.05,
            permutations = 1000,
-           seed = 1234,
            verbose = FALSE,
            threads = 1) {
     #----------------------------------------------
@@ -165,11 +165,6 @@ swing <-
       if (verbose) {
         cat("[Step2/3] : Permuting Network\n")
       }
-      # do permutation here. I.e. randomly switch the labels of the kinases
-      # thus effectively a network permutation between nodes and edges
-      # generate table with permuted column names
-      # NB: this has to be generated first (not in parallel) for reproducibility
-      set.seed(seed)
       n.permute <- lapply(seq_len(permutations), function(i)
         sample(as.character(colnames(data.merge))[7:ncol(data.merge)],
                length(colnames(data.merge[, 7:ncol(data.merge)])),
@@ -221,13 +216,8 @@ swing <-
                          / (as.numeric(permutations) + 1),
                          BPPARAM = MulticoreParam(workers =
                          threads)))
-      
-      #correct p-values to NaN where all counts are zero (i.e. no p-value is 
-      # computable)
-      #swing.out[swing.out$all == 0,]$p.greater <- NaN
-      #swing.out[swing.out$all == 0,]$p.less <- NaN
+
     }
-    
     
     if (verbose) {
       cat("[FINISHED]\n")
@@ -240,16 +230,15 @@ swing <-
     network <- data.merge
     #convert to long table:
     network <- data.table::melt(network,
-                                id.vars = c("annotation"),
-                                measure.vars = 
-                                  colnames(network[7:ncol(network)]))
+                               id.vars = c("annotation"),
+                               measure.vars = 
+                               colnames(network[7:ncol(network)]))
     # keep "significant" edges
     network <- network[network$value == 1, ]
     network <- data.frame(
       "source" = as.character(network$variable),
       "target" = as.character(network$annotation)
     )
-    
     return(list("scores" = swing.out, "network" = network))
   }
 

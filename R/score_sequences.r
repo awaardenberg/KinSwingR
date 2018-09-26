@@ -22,8 +22,6 @@
 #' the input sequences to the same length as the PWM models. If a background is 
 #' provided, this will also be trimmed to the same width as the PWM models. 
 #' Options are: "TRUE, FALSE". Default = FALSE
-#' @param seed This is for reproducible results for permutation testing. To not 
-#' use, set seed = NULL. Default: "1234"
 #' @param verbose Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 #' "TRUE, FALSE". Default = FALSE
 #' @param threads Number of processing cores to use. Default: "1"
@@ -39,7 +37,7 @@
 #' annotated.data <- clean.annotation(input.data=sample.data)
 #'
 #' ## build the PWM models:
-#' set.seed(1)
+#' set.seed(1234)
 #' sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
 #' 1000),]
 #' kinase.pwm.models <- build.pwm(sample.pwm)
@@ -47,7 +45,8 @@
 #' ## score the PWM - substrate matches
 #' ## Using a "random" background, to calculate the p-value of the matches
 #' ## Using n=10 for demonstration
-#'
+#' ## set.seed for reproducibility
+#' set.seed(1234)
 #' pwm.substrate.scores <- score.sequences(input.data = annotated.data,
 #'                                        pwm.in = kinase.pwm.models,
 #'                                        background = "random",
@@ -68,7 +67,6 @@ score.sequences <- function(input.data = NULL,
                             background = "random",
                             n = 1000,
                             force.trim = FALSE,
-                            seed = 1234,
                             verbose = FALSE,
                             threads = 1) {
   if (verbose) {
@@ -89,8 +87,6 @@ score.sequences <- function(input.data = NULL,
         n,
         "force.trim=",
         force.trim,
-        "seed=",
-        seed,
         "verbose=",
         verbose,
         "\n",
@@ -99,7 +95,6 @@ score.sequences <- function(input.data = NULL,
     )
   }
   
-  set.seed(seed)
   #----------------------------------------------
   #format checks:
   if (is.null(input.data))

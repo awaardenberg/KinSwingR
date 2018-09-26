@@ -33,13 +33,6 @@ Integrates kinase PWMs matches against peptide seqeuences and directionality
 as well as significance of peptides for prediction of kinase activity.
 }
 
-\section{swing.master function}{
-
-One master function for computing the swing statistic in one command. Run 
-clean.annotation() first, if peptides need to be extracted from the 
-annotations.
-}
-
 \section{clean.annotation function}{
 
 Function for extracting peptides from multimapped data

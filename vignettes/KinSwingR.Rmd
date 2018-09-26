@@ -80,9 +80,8 @@ KinSwingR is implemented as 3 core functions:
 
 The KinSwing score is a metric of kinase activity, ranging from positive to negative, and p-values are provided to determine significance.
 
-Two additional functions are also provided:
+Additional functions are also provided:
 
-+ **```swing.master()```** a wrapper for for all 3 functions above (```build.pwm()```, ```score.sequences()``` and ```swing()```)
 + **```clean.sequences()```** a helper function to tidy annotations and extract peptide sequences.
 
 Detailed information for each of these functions can be accessed using the ```?``` command before the function of interest. E.g. ```?build.pwm```
@@ -143,15 +142,15 @@ head(pwms$kinase)
 
 ## Score PWM matches against peptide sequences
 
-Next, we will use the PWM models generated, ```pwms```, to identify matches in the ```annotated.data``` table that was cleaned using ```clean.annotation()``` above. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading.
+Next, we will use the PWM models generated, ```pwms```, to identify matches in the ```annotated.data``` table that was cleaned using ```clean.annotation()``` above. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading. ```score.sequences``` draws a random background by default of size ```n = 1000```. It is recommended to use ```set.seed()``` prior to calling ```score.sequences``` if you wish to reproduce your results. To access the help file, which explains all the arguments, type ```?score.sequences``` into the console.
 
 ```{r eval=FALSE}
+# set seed for reproducible results
+set.seed(1234)
 scores <- score.sequences(input.data = annotated.data, 
                           pwm.in = pwms,
                           threads = 4)
 ```
-
-To access the help file, which explains all the arguments, type ```?score.sequences``` into the console.
 
 The outputs of ```scores``` are transparent and accessible. These are however primarily intermediate tables for obtaining swing scores. ```scores``` is a simple list object that contains peptide scores ```(scores$peptide.scores)```, p-values for the peptide scores ```(scores$peptide.p)``` and the background peptides used to score significance ```(scores$background)``` for reproducibility (i.e. the background can saved and reused for reproducibility).
 
@@ -159,9 +158,11 @@ In summary, ```score.sequences()``` scores each input sequence for a match again
 
 ## Predict kinase activity using swing()
 
-Having built a kinase-substrate network, ```swing()``` then integrates the kinase-substrate predictions, directionality and significance of phosphopeptide fold change to assess local connectivity (or swing) of kinase-substrate networks. The final score is a normalised score of predicted kinase activity that is weighted for the number of substrates used in the PWM model and number of peptides in the local kinase-substrate network. By default, this will permute the network 1000 times. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading.
+Having built a kinase-substrate network, ```swing()``` then integrates the kinase-substrate predictions, directionality and significance of phosphopeptide fold change to assess local connectivity (or swing) of kinase-substrate networks. The final score is a normalised score of predicted kinase activity that is weighted for the number of substrates used in the PWM model and number of peptides in the local kinase-substrate network. By default, this will permute the network 1000 times. It is recommended to use ```set.seed()``` prior to calling ```swing``` if you wish to reproduce your results. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading.
 
 ```{r eval=FALSE}
+# set seed for reproducible results
+set.seed(1234)
 swing.out <- swing(input.data = annotated.data, 
                   pwm.in = pwms, 
                   pwm.scores = scores,
@@ -201,17 +202,6 @@ The outputs of this table indicate the following:
 + ```p.less```:  probability of observing a swing score less than
 
 *** See @Kasper2018 and @Waardenberg2018 for methods description ***
-
-## All in one command: swing.master()
-
-This is a wrapper function for performing all KinSwingR tasks together in one call. The following will produce the same final output using the individual steps above.
-
-```{r eval=FALSE}
-one.call <- swing.master(kinase.table = phosphositeplus_human, 
-                         input.data = annotated.data,                          
-                         threads = 4)
-```
-
 
 # KinSwingR algorithm
 
