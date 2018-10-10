@@ -70,29 +70,14 @@ scoreSequences <- function(input.data = NULL,
                             verbose = FALSE,
                             threads = 1) {
   if (verbose) {
-    cat(
-      paste(
-        "Scoring,",
-        nrow(input.data),
-        "sequences provided, against",
-        length(pwm.in[[1]]),
-        "PWM models\n",
-        sep = " "
-      )
-    )
-    cat(
-      paste(
-        "Parameters selected:\n",
-        "n=",
-        n,
-        "force.trim=",
-        force.trim,
-        "verbose=",
-        verbose,
-        "\n",
-        sep = ","
-      )
-    )
+    message("Scoring,", nrow(input.data),
+        "sequences provided, against", length(pwm.in[[1]]),
+        "PWM models")
+    message("Parameters selected:\n", 
+            "n =", n, "\n",
+            "force.trim =", force.trim, "\n",
+            "verbose =", verbose, "\n"
+           )
   }
   
   #----------------------------------------------
@@ -134,14 +119,9 @@ scoreSequences <- function(input.data = NULL,
     )
   if ((min.peptide.seq > min.pwm.length) & force.trim == TRUE) {
     if (verbose) {
-      cat(
-        paste(
-          "trimming input.data sequences to minimum PWM length, which is,",
-          min.pwm.length,
-          "\n",
-          sep = " "
-        )
-      )
+      message("trimming input.data sequences to minimum PWM length, which is,",
+              min.pwm.length
+              )
     }
     #trim  seqs to the min. sequence length in PWMs
     input.data[, 2] <-
@@ -178,15 +158,10 @@ scoreSequences <- function(input.data = NULL,
     
     if ((min.peptide.seq.bg > min.pwm.length) & force.trim == FALSE) {
       if (verbose) {
-        cat(
-          paste(
-            "trimming BACKGROUND sequences provided to minimum PWM length,
+        message("trimming BACKGROUND sequences provided to minimum PWM length,
             which is,",
-            min.pwm.length,
-            "\n",
-            sep = " "
-          )
-        )
+            min.pwm.length
+            )
       }
       #trim seqs to the min. sequence length inPWMs
       background[, 2] <-
@@ -206,7 +181,7 @@ scoreSequences <- function(input.data = NULL,
   #----------------------------------------------
   #1. for each peptide, score against all kinase PWMs provided:
   if (verbose) {
-    cat("[Step1/3] : Scoring peptide sequences against PWMs\n")
+    message("[Step1/3] : Scoring peptide sequences against PWMs")
   }
   peptide.scores <-
     bplapply(seq_len(length(pwm.in[[2]]$kinase)), function(i)
@@ -223,12 +198,7 @@ scoreSequences <- function(input.data = NULL,
   # if no background is provided:
   if (background == "random" && !is.data.frame(background)) {
     if (verbose) {
-      cat(paste(
-        "[Step2/3] : Random background generated from ",
-        n,
-        " peptides\n",
-        sep = ""
-      ))
+      message("[Step2/3] : Random background generated from ", n, " peptides")
     }
     rand.bg <- sample(rownames(peptide.scores), n)
     background.scores <-
@@ -237,16 +207,9 @@ scoreSequences <- function(input.data = NULL,
   # or if background is provided
   if (background != "random" && is.data.frame(background)) {
     if (verbose) {
-      cat(
-        paste(
-          "[Step2/3] : Background provided;
-          calculating PWM scores against background generated from ",
-          n ,
-          " peptides",
-          "\n",
-          sep = ""
-        )
-      )
+      message("[Step2/3] : Background provided; calculating PWM scores against 
+              background generated from ", n, " peptides"
+              )
     }
     rand.bg <- sample(rownames(background), n)
     rand.bg <- background[rownames(background) %in% rand.bg, ]
@@ -267,7 +230,7 @@ scoreSequences <- function(input.data = NULL,
   
   #3. compute p-values:
   if (verbose) {
-    cat("[Step3/3] : Computing p-values for peptide scores:PWM scores\n")
+    message("[Step3/3] : Computing p-values for peptide scores:PWM scores")
   }
   
   #multi-core:
@@ -292,7 +255,7 @@ scoreSequences <- function(input.data = NULL,
   rownames(p.table) <- rownames(peptide.scores)
   
   if (verbose) {
-    cat("[Finished]\n")
+    message("[Finished]")
   }
   return(
     list(

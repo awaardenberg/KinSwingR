@@ -131,13 +131,11 @@ cleanAnnotation <- function(input.data = NULL,
   #6. option for reassignment of letters, incase wild-card differs
   if (replace == TRUE) {
     if (verbose) {
-      print(paste(
-        "Replacing all",
+      message("Replacing all",
         replace.search,
         "with",
-        replace.with,
-        sep = " "
-      ))
+        replace.with
+        )
     }
     data.out$peptide <-
       gsub(replace.search, replace.with, data.out$peptide)
@@ -163,28 +161,17 @@ trimSeqs <- function(seqs.to.trim = NULL,
   min.seq <- min(nchar(seqs.to.trim))
   
   if (min.seq < seq.length) {
-    stop(cat(
-      paste(
-        "You have selected to trim to",
-        seq.length,
-        ", but this is less than
-        minimum sequence length, which is",
-        min.seq,
-        ". Trimming will not be
-        performed. Reduce window size to",
-        min.seq,
-        "or lower to perform
-        trimming",
-        sep = " "
-      )
-    ))
+    stop("You have selected to trim to", seq.length,
+        ", but this is less than minimum sequence length, which is",
+        min.seq, ". Trimming will not be performed. Reduce window size to",
+        min.seq, "or lower to perform trimming"
+        )
   }
   
   #if minimum sequence length is compatible - trim and/or leave same:
   if (min.seq >= seq.length) {
     if (verbose) {
-      cat(paste("Trimming sequences to", seq.length, "total AA width", 
-                sep = " "))
+      message("Trimming sequences to", seq.length, "total AA width")
     }
     
     seq.diff <- (min.seq - seq.length) / 2

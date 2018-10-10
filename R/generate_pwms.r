@@ -81,16 +81,12 @@ buildPWM <- function(kinase.table = NULL,
     center.aa <-
       substr(kinase.table[, 2], half.window, half.window)
     if (verbose) {
-      print(
-        paste(
-          "You have selected to remove",
-          length(which(center.aa == toupper(remove.center))),
-          "peptide sequences for building PWMs that contain a centered letter 
-          of:",
-          toupper(remove.center),
-          sep = " "
-        )
-      )
+      message("You have selected to remove",
+              length(which(center.aa == toupper(remove.center))),
+              "peptide sequences for building PWMs that contain a centered 
+               letter of:",
+               toupper(remove.center)
+             )
     }
     kinase.table <-
       kinase.table[center.aa != toupper(remove.center),]
@@ -100,11 +96,9 @@ buildPWM <- function(kinase.table = NULL,
   #----------------------------------------------
   
   if (verbose) {
-    cat(paste(
-      nrow(kinase.table),
-      "unique kinase:substrate sequences in table provided.",
-      sep = " "
-    ))
+    message(nrow(kinase.table), "unique kinase:substrate sequences in 
+            table provided."
+            )
   }
   
   #initialise table for kinase count data

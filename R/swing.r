@@ -127,8 +127,8 @@ swing <-
     #1. binarise the p-values and the fold change:
     if (verbose) {
       start_time <- Sys.time()
-      cat(paste("Start: ", start_time, "\n", sep = ""))
-      cat("[Step1/3] : Calculating Swing Scores\n")
+      message("Start: ", start_time)
+      message("[Step1/3] : Calculating Swing Scores")
     }
     
     pwm.pval <- pwm.scores[[2]]
@@ -163,7 +163,7 @@ swing <-
     #4. permute data and calculate p-values
     if (permutations != FALSE && permutations > 1) {
       if (verbose) {
-        cat("[Step2/3] : Permuting Network\n")
+        message("[Step2/3] : Permuting Network")
       }
       n.permute <- lapply(seq_len(permutations), function(i)
         sample(as.character(colnames(data.merge))[7:ncol(data.merge)],
@@ -190,7 +190,7 @@ swing <-
         data.frame(Reduce(merge, swing.permute[[1]]))
       
       if (verbose) {
-        cat("[Step3/3] : Calculating p-values\n")
+        message("[Step3/3] : Calculating p-values")
       }
       #obtain p-values two sided, test independently...
       swing.out$p.greater <-
@@ -220,10 +220,9 @@ swing <-
     }
     
     if (verbose) {
-      cat("[FINISHED]\n")
+      message("[FINISHED]\n")
       end_time <- Sys.time() - start_time
-      cat(paste("Finish: ", Sys.time(), "\n", sep = ""))
-      end_time#print(paste(end_time, "\n", sep=""))
+      message("Finish: ", Sys.time())
     }
     
     #5. return interaction table - long
