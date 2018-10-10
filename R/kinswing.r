@@ -8,18 +8,18 @@
 #'
 #' Contact a.waardenberg@gmail.com for questions relating to functionality.
 #'
-#' @section build.pwm function:
+#' @section buildPWM function:
 #' Builds PWMs for kinases from a table of kinases and known substrate 
 #' sequences.
 #'
-#' @section scores.sequences function:
+#' @section scoreSequences function:
 #' Score kinase PWMs matches against a set of peptide seqeuences.
 #'
 #' @section swing function:
 #' Integrates kinase PWMs matches against peptide seqeuences and directionality 
 #' as well as significance of peptides for prediction of kinase activity.
 #'
-#' @section clean.annotation function:
+#' @section cleanAnnotation function:
 #' Function for extracting peptides from multimapped data
 #'
 #' @docType package

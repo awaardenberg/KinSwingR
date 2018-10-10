@@ -11,7 +11,7 @@
 #'  and the following format must be adhered to. Column 1 - Annotation, Column 2
 #'   - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
 #'   - p-value [0-1]. This will extract the peptide sequences from Column1 and 
-#'   replace all values in Column2 to be used in score.sequences(). Where 
+#'   replace all values in Column2 to be used in scoreSequences(). Where 
 #'   peptide sequences have not been extracted from the annotation, leave 
 #'   Column2 as NA's.
 #' @param annotation.delimiter The character used to delimit annotations. 
@@ -49,8 +49,8 @@
 #' ## that PWMs are built correctly.
 #'
 #' ## Sample data for demonstration:
-#' sample.data <- head(example_phosphoproteome)
-#' annotated.data <- clean.annotation(input.data = sample.data,
+#' sample_data <- head(example_phosphoproteome)
+#' annotated_data <- cleanAnnotation(input.data = sample_data,
 #'                                    annotation.delimiter = "|",
 #'                                    multi.protein.delimiter = ":",
 #'                                    multi.site.delimiter = ";",
@@ -60,16 +60,15 @@
 #'                                    replace.with = "_")
 #'
 #'## Return the annotated data with extracted peptides:
-#'head(annotated.data)
+#' head(annotated_data)
 #'
 #' @return A data.table with the peptides extracted from the annotation column
 #'
-#' @export clean.annotation
+#' @export cleanAnnotation
 #' @importFrom data.table data.table
 #' @importFrom sqldf sqldf
 
-
-clean.annotation <- function(input.data = NULL,
+cleanAnnotation <- function(input.data = NULL,
                              annotation.delimiter = "|",
                              multi.protein.delimiter = ":",
                              multi.site.delimiter = ";",
@@ -157,7 +156,7 @@ clean.annotation <- function(input.data = NULL,
 #
 # @return Trimmed sequences or HALT
 
-trim.seqs <- function(seqs.to.trim = NULL,
+trimSeqs <- function(seqs.to.trim = NULL,
                       seq.length = NULL,
                       verbose = FALSE) {
   #check minimum sequence length is compatible

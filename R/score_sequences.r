@@ -2,14 +2,14 @@
 #' (PWMs)
 #'
 #' @description Scores each input sequence for a match against all PWMs provided
-#'  from build.pwm() and generates p-values for scores. The output of this 
+#'  from buildPWM() and generates p-values for scores. The output of this 
 #'  function is to be used for building the swing metric, the predicted activity
 #'   of kinases.
 #' @param input.data A data.frame of phoshopeptide data. Must contain 4 columns
 #'  and the following format must be adhered to. Column 1 - Annotation, Column 2
 #'   - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
 #'   - p-value [0-1]
-#' @param pwm.in List of PWMs created using build.pwm()
+#' @param pwm.in List of PWMs created using buildPWM()
 #' @param background Option to provide a data.frame of peptides to use as 
 #' background. If providing a background as a table, this must contain two 
 #' columns; Column 1 - Annotation, Column 2 - centered peptide sequence. These 
@@ -33,36 +33,36 @@
 #'
 #' ## clean up the annotations
 #' ## sample 100 data points for demonstration
-#' sample.data <- head(example_phosphoproteome, 100)
-#' annotated.data <- clean.annotation(input.data=sample.data)
+#' sample_data <- head(example_phosphoproteome, 100)
+#' annotated_data <- cleanAnnotation(input.data = sample_data)
 #'
 #' ## build the PWM models:
 #' set.seed(1234)
-#' sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
+#' sample_pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
 #' 1000),]
-#' kinase.pwm.models <- build.pwm(sample.pwm)
+#' pwms <- buildPWM(sample_pwm)
 #'
 #' ## score the PWM - substrate matches
 #' ## Using a "random" background, to calculate the p-value of the matches
 #' ## Using n=10 for demonstration
 #' ## set.seed for reproducibility
 #' set.seed(1234)
-#' pwm.substrate.scores <- score.sequences(input.data = annotated.data,
-#'                                        pwm.in = kinase.pwm.models,
-#'                                        background = "random",
-#'                                        n = 10,
-#'                                        threads = 4)
+#' substrate_scores <- scoreSequences(input.data = annotated_data,
+#'                                    pwm.in = pwms,
+#'                                    background = "random",
+#'                                    n = 10,
+#'                                    threads = 4)
 #'
 #' @return A list with 3 elements: 1) PWM-substrate scores: 
-#' pwm.substrate.scores$peptide.scores, 2) PWM-substrate p-values: 
-#' pwm.substrate.scores$peptide.p and 3) Background used for reproducibility: 
-#' pwm.substrate.scores$background
+#' substrate_scores$peptide.scores, 2) PWM-substrate p-values: 
+#' substrate_scores$peptide.p and 3) Background used for reproducibility: 
+#' substrate_scores$background
 #'
-#' @export score.sequences
+#' @export scoreSequences
 #' @importFrom BiocParallel bplapply
 #' @importFrom BiocParallel MulticoreParam
 
-score.sequences <- function(input.data = NULL,
+scoreSequences <- function(input.data = NULL,
                             pwm.in = NULL,
                             background = "random",
                             n = 1000,
@@ -105,12 +105,12 @@ score.sequences <- function(input.data = NULL,
   if (is.null(pwm.in))
     stop(
       "pwm.in not provided; you must provide an input table containing
-      computed position weight matrices using build.pwm()"
+      computed position weight matrices using buildPWM()"
     )
   if (!is.list(pwm.in))
     stop(
       "pwm.in is not a list format; something has gone wrong. Make sure
-      you compute the position weight matrices using build.pwm()"
+      you compute the position weight matrices using buildPWM()"
     )
   #min peptide sequence length of input data
   min.peptide.seq <- min(nchar(as.character(input.data[, 2])))
@@ -145,7 +145,7 @@ score.sequences <- function(input.data = NULL,
     }
     #trim  seqs to the min. sequence length in PWMs
     input.data[, 2] <-
-      trim.seqs(
+      trimSeqs(
         seqs.to.trim = as.character(input.data[, 2]),
         seq.length = min.pwm.length,
         verbose = verbose
@@ -190,7 +190,7 @@ score.sequences <- function(input.data = NULL,
       }
       #trim seqs to the min. sequence length inPWMs
       background[, 2] <-
-        trim.seqs(
+        trimSeqs(
           seqs.to.trim = as.character(background[, 2]),
           seq.length = min.pwm.length,
           verbose = verbose
@@ -211,7 +211,7 @@ score.sequences <- function(input.data = NULL,
   peptide.scores <-
     bplapply(seq_len(length(pwm.in[[2]]$kinase)), function(i)
       sapply(seq_len(nrow(input.data)), function(j)
-        seq.score(as.character(input.data[j, 2]), pwm.in[[1]][[i]]))
+        seqScore(as.character(input.data[j, 2]), pwm.in[[1]][[i]]))
       , BPPARAM = MulticoreParam(workers = threads))
   names(peptide.scores) <- pwm.in[[2]]$kinase
   peptide.scores <-
@@ -253,7 +253,7 @@ score.sequences <- function(input.data = NULL,
     background.scores <-
       bplapply(seq_len(length(pwm.in[[2]]$kinase)), function(i)
         sapply(seq_len(nrow(rand.bg)), function(j)
-          seq.score(as.character(rand.bg[j, 2]), pwm.in[[1]][[i]]))
+          seqScore(as.character(rand.bg[j, 2]), pwm.in[[1]][[i]]))
         , BPPARAM = MulticoreParam(workers = threads))
     
     names(background.scores) <- pwm.in[[2]]$kinase
@@ -304,7 +304,7 @@ score.sequences <- function(input.data = NULL,
   }
 
 # This helper function calculates PWM matching scores
-seq.score <- function(input.seq, pwm) {
+seqScore <- function(input.seq, pwm) {
   #vector of letters of sequence to score.
   input.seq <- unlist(strsplit(input.seq, ""))
   #function to score ther matching AA to PWM position:

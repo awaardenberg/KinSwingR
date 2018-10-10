@@ -12,9 +12,9 @@ swing(input.data = NULL, pwm.in = NULL, pwm.scores = NULL,
 \item{input.data}{A data.frame of phoshopeptide data. Must contain 4 columns
 and the following format must be adhered to. Column 1 - Annotation, Column 2
  - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
- - p-value [0-1]. This must be the same dataframe used in score.sequences()}
+ - p-value [0-1]. This must be the same dataframe used in scoreSequences()}
 
-\item{pwm.in}{List of PWMs created using build.pwm()}
+\item{pwm.in}{List of PWMs created using buildPWM()}
 
 \item{pwm.scores}{List of PWM-substrate scores created using
 score.seqeuences()}
@@ -39,7 +39,7 @@ kinase-subtrate edges of the network n times. To not perform permutations and
 \item{threads}{Number of processing cores to use. Default: "1"}
 }
 \value{
-A data.table of swing scores.
+A data.table of swing scores
 }
 \description{
 This function integrates the kinase-substrate predictions,
@@ -57,33 +57,33 @@ data(phosphositeplus_human)
 
 ## clean up the annotations
 ## sample 100 data points for demonstration
-sample.data <- head(example_phosphoproteome, 100)
-annotated.data <- clean.annotation(input.data=sample.data)
+sample_data <- head(example_phosphoproteome, 100)
+annotated_data <- cleanAnnotation(input.data = sample_data)
 
 ## build the PWM models:
 set.seed(1234)
-sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
+sample_pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
 1000),]
-kinase.pwm.models <- build.pwm(sample.pwm)
+pwms <- buildPWM(sample_pwm)
 
 ## score the PWM - substrate matches
 ## Using a "random" background, to calculate the p-value of the matches
-## Using n=10 for demonstration
+## Using n = 10 for demonstration
 ## set.seed for reproducibility
 set.seed(1234)
-pwm.substrate.scores <- score.sequences(input.data = annotated.data,
-                                       pwm.in = kinase.pwm.models,
-                                       background = "random",
-                                       n = 10,
-                                       threads = 4)
+substrate_scores <- scoreSequences(input.data = annotated_data,
+                                   pwm.in = pwms,
+                                   background = "random",
+                                   n = 10,
+                                   threads = 4)
 
 ## Use the pwm.scores and annotated data to predict kinase activity.
 ## This will permute the network node and edges 10 times for demonstration.
 ## set.seed for reproducibility
 set.seed(1234)
-swing.output <- swing(input.data = annotated.data,
-                      pwm.in = kinase.pwm.models,
-                      pwm.scores = pwm.substrate.scores,
+swing_output <- swing(input.data = annotated_data,
+                      pwm.in = pwms,
+                      pwm.scores = substrate_scores,
                       permutations = 10,
                       threads = 4)
 

@@ -13,16 +13,15 @@ KinSwingR is a score that is normalised and weighted for prediction of kinase
  activity.
 }
 \details{
-This is a development version of KinSwingR Contact a.waardenberg@gmail.com 
-for questions relating to functionality.
+Contact a.waardenberg@gmail.com for questions relating to functionality.
 }
-\section{build.pwm function}{
+\section{buildPWM function}{
 
 Builds PWMs for kinases from a table of kinases and known substrate 
 sequences.
 }
 
-\section{scores.sequences function}{
+\section{scoreSequences function}{
 
 Score kinase PWMs matches against a set of peptide seqeuences.
 }
@@ -33,7 +32,7 @@ Integrates kinase PWMs matches against peptide seqeuences and directionality
 as well as significance of peptides for prediction of kinase activity.
 }
 
-\section{clean.annotation function}{
+\section{cleanAnnotation function}{
 
 Function for extracting peptides from multimapped data
 }

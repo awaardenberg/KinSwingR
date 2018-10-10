@@ -10,8 +10,8 @@
 #' @param input.data A data.frame of phoshopeptide data. Must contain 4 columns
 #'  and the following format must be adhered to. Column 1 - Annotation, Column 2
 #'   - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
-#'   - p-value [0-1]. This must be the same dataframe used in score.sequences()
-#' @param pwm.in List of PWMs created using build.pwm()
+#'   - p-value [0-1]. This must be the same dataframe used in scoreSequences()
+#' @param pwm.in List of PWMs created using buildPWM()
 #' @param pwm.scores List of PWM-substrate scores created using
 #' score.seqeuences()
 #' @param pseudo.count Pseudo-count for avoiding log-zero transformations.
@@ -35,37 +35,37 @@
 #'
 #' ## clean up the annotations
 #' ## sample 100 data points for demonstration
-#' sample.data <- head(example_phosphoproteome, 100)
-#' annotated.data <- clean.annotation(input.data=sample.data)
+#' sample_data <- head(example_phosphoproteome, 100)
+#' annotated_data <- cleanAnnotation(input.data = sample_data)
 #'
 #' ## build the PWM models:
 #' set.seed(1234)
-#' sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
+#' sample_pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
 #' 1000),]
-#' kinase.pwm.models <- build.pwm(sample.pwm)
+#' pwms <- buildPWM(sample_pwm)
 #'
 #' ## score the PWM - substrate matches
 #' ## Using a "random" background, to calculate the p-value of the matches
-#' ## Using n=10 for demonstration
+#' ## Using n = 10 for demonstration
 #' ## set.seed for reproducibility
 #' set.seed(1234)
-#' pwm.substrate.scores <- score.sequences(input.data = annotated.data,
-#'                                        pwm.in = kinase.pwm.models,
-#'                                        background = "random",
-#'                                        n = 10,
-#'                                        threads = 4)
+#' substrate_scores <- scoreSequences(input.data = annotated_data,
+#'                                    pwm.in = pwms,
+#'                                    background = "random",
+#'                                    n = 10,
+#'                                    threads = 4)
 #'
 #' ## Use the pwm.scores and annotated data to predict kinase activity.
 #' ## This will permute the network node and edges 10 times for demonstration.
 #' ## set.seed for reproducibility
 #' set.seed(1234)
-#' swing.output <- swing(input.data = annotated.data,
-#'                       pwm.in = kinase.pwm.models,
-#'                       pwm.scores = pwm.substrate.scores,
+#' swing_output <- swing(input.data = annotated_data,
+#'                       pwm.in = pwms,
+#'                       pwm.scores = substrate_scores,
 #'                       permutations = 10,
 #'                       threads = 4)
 #'
-#' @return A data.table of swing scores.
+#' @return A data.table of swing scores
 #'
 #' @export swing
 #' @importFrom BiocParallel bplapply
@@ -93,12 +93,12 @@ swing <-
     if (is.null(pwm.in))
       stop(
         "pwm.in not provided; you must provide an input table containing
-        computed position weight matrices using build.pwm()"
+        computed position weight matrices using buildPWM()"
       )
     if (!is.list(pwm.in))
       stop(
         "pwm.in is not a list format; something has gone wrong. Make sure you
-        compute the position weight matrices using build.pwm()"
+        compute the position weight matrices using buildPWM()"
       )
     if (is.null(pwm.scores))
       stop(
@@ -108,7 +108,7 @@ swing <-
     if (!is.list(pwm.scores))
       stop(
         "pwm.scores is not a list format; something has gone wrong. Make sure
-        PWM-substrate matches are scored using score.sequences()"
+        PWM-substrate matches are scored using scoreSequences()"
       )
     if (p.cut.pwm >= 1)
       stop("p.cut.pwm needs to be less than 1; make sure your p-values are not
@@ -153,7 +153,7 @@ swing <-
       unique(merge(input.data, pwm.pval, by = "annotation"))
     
     #3. Swing scores of REAL data.
-    swing.out <- swing.score(
+    swing.out <- swingScore(
       data.merge = data.merge,
       pwm.in = pwm.in,
       permute = FALSE,
@@ -173,7 +173,7 @@ swing <-
       names(n.permute) <- paste("rand", seq_len(permutations), sep = "")
       # calculate swing scores and return in a single table
       swing.permute <- list(bplapply(seq_len(permutations), function(i)
-        swing.score(
+        swingScore(
           data.merge = setNames(data.frame(data.merge),
                                 c(colnames(data.merge)[1:6],
                                   n.permute[[i]])),
@@ -246,7 +246,7 @@ swing <-
 # no verbose in this helper
 # permute - for setting right table format (using data.table) for merging.
 
-swing.score <-
+swingScore <-
   function(data.merge,
            pwm.in,
            pseudo.count = 1,

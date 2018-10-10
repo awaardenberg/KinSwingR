@@ -3,7 +3,7 @@
 #' @description Generate Position Weight Matrices (PWMs) for a table containing 
 #' centered substrate peptide sequences for a list of kinases. The output of 
 #' this function is to be used for scoring PWM matches to peptides via 
-#' score.sequences()
+#' scoreSequences()
 #' @param kinase.table A data.frame of substrate sequences and kinase names. 
 #' Format of data must be as follows: column 1 - kinase/kinase family 
 #' name/GeneID, column 2 - centered peptide seqeuence.
@@ -28,21 +28,21 @@
 #'
 #' ##randomly sample 1000 substrates for demonstration.
 #' set.seed(1)
-#' sample.pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
+#' sample_pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 
 #' 1000),]
-#' kinase.pwm.models <- build.pwm(sample.pwm)
+#' pwms <- buildPWM(sample_pwm)
 #'
 #' ## Data frame of models built and number of sequences used to build each
 #' ## PWM model:
-#' head(kinase.pwm.models$kinase)
+#' head(pwms$kinase)
 #'
 #' @return Output is a list containing two tables, "pwm" and "kinase". To access
-#'  PWMs: my.PWM.list$pwm and Table of Kinase and sequence counts: 
-#'  my.PWM.list$kinase
+#'  PWMs: pwms$pwm and Table of Kinase and sequence counts: 
+#'  pwms$kinase
 #'
-#' @export build.pwm
+#' @export buildPWM
 
-build.pwm <- function(kinase.table = NULL,
+buildPWM <- function(kinase.table = NULL,
                       wild.card = "_",
                       substrate.length = 15,
                       substrates.n = 10,
@@ -70,7 +70,7 @@ build.pwm <- function(kinase.table = NULL,
   #----------------------------------------------
   #call trim.seq function and trim sequences:
   kinase.table[, 2] <-
-    trim.seqs(kinase.table[, 2], 
+    trimSeqs(kinase.table[, 2], 
               seq.length = substrate.length, 
               verbose = verbose)
   kinase.table[, 2] <- toupper(kinase.table[, 2])
@@ -122,7 +122,7 @@ build.pwm <- function(kinase.table = NULL,
   #generate PWM list:
   pwm.list <-
     c(lapply(seq_len(nrow(kinase.summary)), function(i)
-      score.pwm(
+      scorePWM(
         as.character(kinase.table[, 2][kinase.table[, 1] == 
                                          kinase.summary[i, 1]]),
         substrate.length = substrate.length,
@@ -135,7 +135,7 @@ build.pwm <- function(kinase.table = NULL,
 
 # this helper function performs the calculations for building the PWMs
 
-score.pwm <-
+scorePWM <-
   function(input.data,
            substrate.length,
            wild.card = "_",
