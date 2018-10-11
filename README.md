@@ -8,7 +8,7 @@ To obtain the latest version from github, install devtools in R and use the foll
 
 ```R
 library(devtools)
-devtools::install_github("awaardenberg/KinSwingR")
+devtools::install_github("awaardenberg/KinSwingR", build_vignettes = TRUE)
 ```
 
 ## Examples
