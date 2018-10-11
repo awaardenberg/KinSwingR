@@ -4,29 +4,29 @@
 \alias{buildPWM}
 \title{Generate Position Weight Matrices (PWMs)}
 \usage{
-buildPWM(kinase.table = NULL, wild.card = "_", substrate.length = 15,
-  substrates.n = 10, pseudo = 0.01, remove.center = FALSE,
+buildPWM(kinase_table = NULL, wild_card = "_", substrate_length = 15,
+  substrates_n = 10, pseudo = 0.01, remove_center = FALSE,
   verbose = FALSE)
 }
 \arguments{
-\item{kinase.table}{A data.frame of substrate sequences and kinase names. 
+\item{kinase_table}{A data.frame of substrate sequences and kinase names. 
 Format of data must be as follows: column 1 - kinase/kinase family 
 name/GeneID, column 2 - centered peptide seqeuence.}
 
-\item{wild.card}{Letter to describe sequences that are outside of the protein
+\item{wild_card}{Letter to describe sequences that are outside of the protein
 after centering on the phosphosite (e.g ___MERSTRELCLNF). Default: "_".}
 
-\item{substrate.length}{Full length of substrate sequence (default is 15). 
-Will be trimmed automatically or report error if sequences in kinase.table 
+\item{substrate_length}{Full length of substrate sequence (default is 15). 
+Will be trimmed automatically or report error if sequences in kinase_table 
 are not long enough.}
 
-\item{substrates.n}{Number of sequences used to build a PWM model. Low 
+\item{substrates_n}{Number of sequences used to build a PWM model. Low 
 sequence counts will produce poor representative PWM models. Default: "10"}
 
 \item{pseudo}{Small number to add to values for PWM log transformation to 
 prevent log transformation of zero. Default = 0.01}
 
-\item{remove.center}{Remove all peptide seqeuences with the central amino 
+\item{remove_center}{Remove all peptide seqeuences with the central amino 
 acid matching a character (e.g. "y"). Default = FALSE}
 
 \item{verbose}{Print progress to screen. Default=FALSE}

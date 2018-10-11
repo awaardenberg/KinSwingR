@@ -7,18 +7,18 @@
 #' permutations are selected, network node:edges are permutated. P-values will 
 #' be calculated for both ends of the distribution of swing scores (positive and
 #'  negative swing scores).
-#' @param input.data A data.frame of phoshopeptide data. Must contain 4 columns
+#' @param input_data A data.frame of phoshopeptide data. Must contain 4 columns
 #'  and the following format must be adhered to. Column 1 - Annotation, Column 2
 #'   - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
 #'   - p-value [0-1]. This must be the same dataframe used in scoreSequences()
-#' @param pwm.in List of PWMs created using buildPWM()
-#' @param pwm.scores List of PWM-substrate scores created using
-#' score.seqeuences()
-#' @param pseudo.count Pseudo-count for avoiding log-zero transformations.
+#' @param pwm_in List of PWMs created using buildPWM()
+#' @param pwm_scores List of PWM-substrate scores created using
+#' scoreSequences()
+#' @param pseudo_count Pseudo-count for avoiding log-zero transformations.
 #' Default: "1"
-#' @param p.cut.pwm Significance level for determining a significant
+#' @param p_cut_pwm Significance level for determining a significant
 #' kinase-substrate enrichment. Default: "0.05"
-#' @param p.cut.fc Significance level for determining a significant level of
+#' @param p_cut_fc Significance level for determining a significant level of
 #' Fold-change in the phosphoproteomics data. Default: "0.05"
 #' @param permutations Number of permutations to perform. This will shuffle the 
 #' kinase-subtrate edges of the network n times. To not perform permutations and
@@ -26,7 +26,6 @@
 #'   "1000"
 #' @param verbose Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 #' "TRUE, FALSE". Default=FALSE
-#' @param threads Number of processing cores to use. Default: "1"
 #'
 #' @examples
 #' ## import data
@@ -36,7 +35,7 @@
 #' ## clean up the annotations
 #' ## sample 100 data points for demonstration
 #' sample_data <- head(example_phosphoproteome, 100)
-#' annotated_data <- cleanAnnotation(input.data = sample_data)
+#' annotated_data <- cleanAnnotation(input_data = sample_data)
 #'
 #' ## build the PWM models:
 #' set.seed(1234)
@@ -49,21 +48,19 @@
 #' ## Using n = 10 for demonstration
 #' ## set.seed for reproducibility
 #' set.seed(1234)
-#' substrate_scores <- scoreSequences(input.data = annotated_data,
-#'                                    pwm.in = pwms,
+#' substrate_scores <- scoreSequences(input_data = annotated_data,
+#'                                    pwm_in = pwms,
 #'                                    background = "random",
-#'                                    n = 10,
-#'                                    threads = 4)
+#'                                    n = 10)
 #'
-#' ## Use the pwm.scores and annotated data to predict kinase activity.
+#' ## Use substrate_scores and annotated_data data to predict kinase activity.
 #' ## This will permute the network node and edges 10 times for demonstration.
 #' ## set.seed for reproducibility
 #' set.seed(1234)
-#' swing_output <- swing(input.data = annotated_data,
-#'                       pwm.in = pwms,
-#'                       pwm.scores = substrate_scores,
-#'                       permutations = 10,
-#'                       threads = 4)
+#' swing_output <- swing(input_data = annotated_data,
+#'                       pwm_in = pwms,
+#'                       pwm_scores = substrate_scores,
+#'                       permutations = 10)
 #'
 #' @return A data.table of swing scores
 #'
@@ -75,46 +72,45 @@
 #' @importFrom data.table melt.data.table
 
 swing <-
-  function(input.data = NULL,
-           pwm.in = NULL,
-           pwm.scores = NULL,
-           pseudo.count = 1,
-           p.cut.pwm = 0.05,
-           p.cut.fc = 0.05,
+  function(input_data = NULL,
+           pwm_in = NULL,
+           pwm_scores = NULL,
+           pseudo_count = 1,
+           p_cut_pwm = 0.05,
+           p_cut_fc = 0.05,
            permutations = 1000,
-           verbose = FALSE,
-           threads = 1) {
+           verbose = FALSE) {
     #----------------------------------------------
     #format checks:
-    if (is.null(input.data))
-      stop("input.data not provided; you must provide an input table")
-    if (!is.data.frame(input.data))
-      stop("input.data is not a data.frame; you must provide an input table")
-    if (is.null(pwm.in))
+    if (is.null(input_data))
+      stop("input_data not provided; you must provide an input table")
+    if (!is.data.frame(input_data))
+      stop("input_data is not a data.frame; you must provide an input table")
+    if (is.null(pwm_in))
       stop(
-        "pwm.in not provided; you must provide an input table containing
+        "pwm_in not provided; you must provide an input table containing
         computed position weight matrices using buildPWM()"
       )
-    if (!is.list(pwm.in))
+    if (!is.list(pwm_in))
       stop(
-        "pwm.in is not a list format; something has gone wrong. Make sure you
+        "pwm_in is not a list format; something has gone wrong. Make sure you
         compute the position weight matrices using buildPWM()"
       )
-    if (is.null(pwm.scores))
+    if (is.null(pwm_scores))
       stop(
-        "pwm.scores not provided; you must provide an input table containing
-        computed scores using scores.sequences()"
+        "pwm_scores not provided; you must provide an input table containing
+        computed scores using scoreSequences()"
       )
-    if (!is.list(pwm.scores))
+    if (!is.list(pwm_scores))
       stop(
-        "pwm.scores is not a list format; something has gone wrong. Make sure
+        "pwm_scores is not a list format; something has gone wrong. Make sure
         PWM-substrate matches are scored using scoreSequences()"
       )
-    if (p.cut.pwm >= 1)
-      stop("p.cut.pwm needs to be less than 1; make sure your p-values are not
+    if (p_cut_pwm >= 1)
+      stop("p_cut_pwm needs to be less than 1; make sure your p-values are not
            log transformed")
-    if (p.cut.fc >= 1)
-      stop("p.cut.fc needs to be less than 1; make sure your p-values are not
+    if (p_cut_fc >= 1)
+      stop("p_cut_fc needs to be less than 1; make sure your p-values are not
            log transformed")
     if (permutations != FALSE &
         (!is.numeric(permutations) | permutations < 1))
@@ -131,33 +127,33 @@ swing <-
       message("[Step1/3] : Calculating Swing Scores")
     }
     
-    pwm.pval <- pwm.scores[[2]]
+    pwm_pval <- pwm_scores[[2]]
     #binarise the p-values:
-    pwm.pval[, 3:ncol(pwm.pval)] <-
-      ifelse(pwm.pval[, 3:ncol(pwm.pval)] > p.cut.pwm, 0, 1)
+    pwm_pval[, 3:ncol(pwm_pval)] <-
+      ifelse(pwm_pval[, 3:ncol(pwm_pval)] > p_cut_pwm, 0, 1)
     #binarise FC:
-    input.data[, 3] <- ifelse(as.numeric(input.data[, 3]) > 0, 1, -1)
+    input_data[, 3] <- ifelse(as.numeric(input_data[, 3]) > 0, 1, -1)
     #binarise p-value:
-    input.data[, 4] <-
-      ifelse(as.numeric(input.data[, 4]) > p.cut.fc, 0, 1)
+    input_data[, 4] <-
+      ifelse(as.numeric(input_data[, 4]) > p_cut_fc, 0, 1)
     #compute Sipk statistic (Sipk - see paper):
-    input.data$Sipk <-
-      as.numeric(input.data[, 3]) * as.numeric(input.data[, 4])
+    input_data$Sipk <-
+      as.numeric(input_data[, 3]) * as.numeric(input_data[, 4])
     
     #2.merge the tables together, summarise counts and unique
-    input.data$annotation <-
-      paste(input.data$annotation, input.data$peptide, sep = "::")
-    pwm.pval$annotation <-
-      paste(pwm.pval$annotation, pwm.pval$peptide, sep = "::")
-    data.merge <-
-      unique(merge(input.data, pwm.pval, by = "annotation"))
+    input_data$annotation <-
+      paste(input_data$annotation, input_data$peptide, sep = "::")
+    pwm_pval$annotation <-
+      paste(pwm_pval$annotation, pwm_pval$peptide, sep = "::")
+    data_merge <-
+      unique(merge(input_data, pwm_pval, by = "annotation"))
     
     #3. Swing scores of REAL data.
-    swing.out <- swingScore(
-      data.merge = data.merge,
-      pwm.in = pwm.in,
+    swing_out <- swingScore(
+      data_merge = data_merge,
+      pwm_in = pwm_in,
       permute = FALSE,
-      pseudo.count = pseudo.count
+      pseudo_count = pseudo_count
     )
     
     #4. permute data and calculate p-values
@@ -165,58 +161,51 @@ swing <-
       if (verbose) {
         message("[Step2/3] : Permuting Network")
       }
-      n.permute <- lapply(seq_len(permutations), function(i)
-        sample(as.character(colnames(data.merge))[7:ncol(data.merge)],
-               length(colnames(data.merge[, 7:ncol(data.merge)])),
+      n_permute <- lapply(seq_len(permutations), function(i)
+        sample(as.character(colnames(data_merge))[7:ncol(data_merge)],
+               length(colnames(data_merge[, 7:ncol(data_merge)])),
                replace = FALSE))
       # not really required
-      names(n.permute) <- paste("rand", seq_len(permutations), sep = "")
+      names(n_permute) <- paste("rand", seq_len(permutations), sep = "")
       # calculate swing scores and return in a single table
-      swing.permute <- list(bplapply(seq_len(permutations), function(i)
+      swing_permute <- list(bplapply(seq_len(permutations), function(i)
         swingScore(
-          data.merge = setNames(data.frame(data.merge),
-                                c(colnames(data.merge)[1:6],
-                                  n.permute[[i]])),
-          pwm.in = pwm.in,
+          data_merge = setNames(data.frame(data_merge),
+                                c(colnames(data_merge)[1:6],
+                                  n_permute[[i]])),
+          pwm_in = pwm_in,
           permute = TRUE,
-          pseudo.count = pseudo.count,
+          pseudo_count = pseudo_count,
           n = i
-        ),
-        BPPARAM = MulticoreParam(workers =
-                                   threads)))
+        )))
       
       # uses data.table library to merge:
-      swing.permute <-
-        data.frame(Reduce(merge, swing.permute[[1]]))
+      swing_permute <-
+        data.frame(Reduce(merge, swing_permute[[1]]))
       
       if (verbose) {
         message("[Step3/3] : Calculating p-values")
       }
       #obtain p-values two sided, test independently...
-      swing.out$p.greater <-
-        unlist(bplapply(seq_len(nrow(swing.out)), function(i)
+      swing_out$p_greater <-
+        unlist(bplapply(seq_len(nrow(swing_out)), function(i)
           (sum(
             ifelse(
-              as.numeric(swing.permute[swing.permute$kinase ==
-                         swing.out$kinase[i], ][2:ncol(swing.permute)]) >
-                         as.numeric(swing.out$swing.raw[i]), 1, 0), 
+              as.numeric(swing_permute[swing_permute$kinase ==
+                         swing_out$kinase[i], ][2:ncol(swing_permute)]) >
+                         as.numeric(swing_out$swing_raw[i]), 1, 0), 
                          na.rm = TRUE) + 1)
-                         / (as.numeric(permutations) + 1),
-                         BPPARAM = MulticoreParam(workers =
-                         threads)))
+                         / (as.numeric(permutations) + 1)))
       
-      swing.out$p.less <-
-        unlist(bplapply(seq_len(nrow(swing.out)), function(i)
+      swing_out$p_less <-
+        unlist(bplapply(seq_len(nrow(swing_out)), function(i)
           (sum(
             ifelse(
-              as.numeric(swing.permute[swing.permute$kinase ==
-                         swing.out$kinase[i], ][2:ncol(swing.permute)]) <
-                         as.numeric(swing.out$swing.raw[i]), 1, 0
+              as.numeric(swing_permute[swing_permute$kinase ==
+                         swing_out$kinase[i], ][2:ncol(swing_permute)]) <
+                         as.numeric(swing_out$swing_raw[i]), 1, 0
                          ), na.rm = TRUE) + 1)
-                         / (as.numeric(permutations) + 1),
-                         BPPARAM = MulticoreParam(workers =
-                         threads)))
-
+                         / (as.numeric(permutations) + 1)))
     }
     
     if (verbose) {
@@ -226,7 +215,7 @@ swing <-
     }
     
     #5. return interaction table - long
-    network <- data.merge
+    network <- data_merge
     #convert to long table:
     network <- data.table::melt(network,
                                id.vars = c("annotation"),
@@ -238,7 +227,7 @@ swing <-
       "source" = as.character(network$variable),
       "target" = as.character(network$annotation)
     )
-    return(list("scores" = swing.out, "network" = network))
+    return(list("scores" = swing_out, "network" = network))
   }
 
 # describeIn swing This helper function performs the swing score calculation
@@ -246,59 +235,59 @@ swing <-
 # permute - for setting right table format (using data.table) for merging.
 
 swingScore <-
-  function(data.merge,
-           pwm.in,
-           pseudo.count = 1,
+  function(data_merge,
+           pwm_in,
+           pseudo_count = 1,
            permute = FALSE,
            n = 1) {
     #----------------------------------------------
     #count significant positive
-    p.k <-
-      sapply(7:ncol(data.merge), function (i)
-        sum(data.merge$Sipk * data.merge[i] == 1))
+    p_k <-
+      sapply(7:ncol(data_merge), function (i)
+        sum(data_merge$Sipk * data_merge[i] == 1))
     #count significant negative
-    n.k <-
-      sapply(7:ncol(data.merge), function (i)
-        sum(data.merge$Sipk * data.merge[i] == -1))
+    n_k <-
+      sapply(7:ncol(data_merge), function (i)
+        sum(data_merge$Sipk * data_merge[i] == -1))
     #all counts (both positive and negative).
-    t.k <- p.k + n.k
+    t_k <- p_k + n_k
     #----------------------------------------------
     #compute swing statistics:
-    p.n.all <-
+    p_n_all <-
       data.frame(
-        "kinase" = colnames(data.merge[7:ncol(data.merge)]),
-        "pos" = p.k,
-        "neg" = n.k,
-        "all" = t.k
+        "kinase" = colnames(data_merge[7:ncol(data_merge)]),
+        "pos" = p_k,
+        "neg" = n_k,
+        "all" = t_k
       )
     #compute stats:
     #proportion positive/negative:
-    p.n.all$pk <- p.n.all$pos / p.n.all$all
-    p.n.all$nk <- p.n.all$neg / p.n.all$all
-    p.n.all$swing.raw <-
-      (p.n.all$pk + pseudo.count) / (p.n.all$nk + pseudo.count)
+    p_n_all$pk <- p_n_all$pos / p_n_all$all
+    p_n_all$nk <- p_n_all$neg / p_n_all$all
+    p_n_all$swing_raw <-
+      (p_n_all$pk + pseudo_count) / (p_n_all$nk + pseudo_count)
     #include the count numbers:
-    p.n.all <- merge(p.n.all, pwm.in$kinase, by = "kinase")
+    p_n_all <- merge(p_n_all, pwm_in$kinase, by = "kinase")
     #weighted by number of substrates:
-    p.n.all$swing.raw <-
-      log2(p.n.all$swing.raw) * log2(p.n.all$n + pseudo.count)
+    p_n_all$swing_raw <-
+      log2(p_n_all$swing_raw) * log2(p_n_all$n + pseudo_count)
     #weighted by size of kinase-substrate network:
-    p.n.all$swing.raw <-
-      p.n.all$swing.raw * log2(p.n.all$all + pseudo.count)
+    p_n_all$swing_raw <-
+      p_n_all$swing_raw * log2(p_n_all$all + pseudo_count)
     #z-score transform
-    p.n.all$swing <-
-      (p.n.all$swing.raw - mean(p.n.all$swing.raw, na.rm = TRUE)) / 
-      sd(p.n.all$swing.raw, na.rm = TRUE)
+    p_n_all$swing <-
+      (p_n_all$swing_raw - mean(p_n_all$swing_raw, na.rm = TRUE)) / 
+      sd(p_n_all$swing_raw, na.rm = TRUE)
     #order results and return table::
-    p.n.all <- p.n.all[order(p.n.all$swing, decreasing = TRUE),]
+    p_n_all <- p_n_all[order(p_n_all$swing, decreasing = TRUE),]
     
     # for permuted tables, return the scores in
     # data.table format for merge function!
     if (permute == "TRUE") {
-      p.n.all <- data.frame(p.n.all$kinase, p.n.all$swing.raw)
-      colnames(p.n.all) <- c("kinase", paste("swing.raw.", n, sep = ""))
-      p.n.all = data.table(p.n.all, key = 'kinase')
+      p_n_all <- data.frame(p_n_all$kinase, p_n_all$swing_raw)
+      colnames(p_n_all) <- c("kinase", paste("swing_raw_", n, sep = ""))
+      p_n_all = data.table(p_n_all, key = 'kinase')
     }
     
-    return(p.n.all)
+    return(p_n_all)
   }

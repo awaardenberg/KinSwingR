@@ -4,19 +4,19 @@
 #' centered substrate peptide sequences for a list of kinases. The output of 
 #' this function is to be used for scoring PWM matches to peptides via 
 #' scoreSequences()
-#' @param kinase.table A data.frame of substrate sequences and kinase names. 
+#' @param kinase_table A data.frame of substrate sequences and kinase names. 
 #' Format of data must be as follows: column 1 - kinase/kinase family 
 #' name/GeneID, column 2 - centered peptide seqeuence.
-#' @param wild.card Letter to describe sequences that are outside of the protein
+#' @param wild_card Letter to describe sequences that are outside of the protein
 #'  after centering on the phosphosite (e.g ___MERSTRELCLNF). Default: "_".
-#' @param substrate.length Full length of substrate sequence (default is 15). 
-#' Will be trimmed automatically or report error if sequences in kinase.table 
+#' @param substrate_length Full length of substrate sequence (default is 15). 
+#' Will be trimmed automatically or report error if sequences in kinase_table 
 #' are not long enough.
-#' @param substrates.n Number of sequences used to build a PWM model. Low 
+#' @param substrates_n Number of sequences used to build a PWM model. Low 
 #' sequence counts will produce poor representative PWM models. Default: "10"
 #' @param pseudo Small number to add to values for PWM log transformation to 
 #' prevent log transformation of zero. Default = 0.01
-#' @param remove.center Remove all peptide seqeuences with the central amino 
+#' @param remove_center Remove all peptide seqeuences with the central amino 
 #' acid matching a character (e.g. "y"). Default = FALSE
 #' @param verbose Print progress to screen. Default=FALSE
 #'
@@ -42,106 +42,106 @@
 #'
 #' @export buildPWM
 
-buildPWM <- function(kinase.table = NULL,
-                      wild.card = "_",
-                      substrate.length = 15,
-                      substrates.n = 10,
+buildPWM <- function(kinase_table = NULL,
+                      wild_card = "_",
+                      substrate_length = 15,
+                      substrates_n = 10,
                       pseudo = 0.01,
-                      remove.center = FALSE,
+                      remove_center = FALSE,
                       verbose = FALSE) {
   #----------------------------------------------
   #format checks:
-  if (is.null(kinase.table))
-    stop("kinase.table not provided; you must provide an input table")
-  if (!is.matrix(kinase.table))
-    stop("kinase.table is not a table; you must provide an
+  if (is.null(kinase_table))
+    stop("kinase_table not provided; you must provide an input table")
+  if (!is.matrix(kinase_table))
+    stop("kinase_table is not a table; you must provide an
          input table")
   #remove NA's
-  kinase.table <- kinase.table[!is.na(kinase.table[, 2]),]
+  kinase_table <- kinase_table[!is.na(kinase_table[, 2]),]
   
-  if (substrate.length < 3)
+  if (substrate_length < 3)
     stop(
-      "substrate.length needs to be greater than 2; increase the
+      "substrate_length needs to be greater than 2; increase the
       length of substrate window size"
     )
-  if ((lapply(substrate.length, "%%", 2) == 0) == TRUE)
-    stop("substrate.length must be an odd number! I.e. centered sequence
+  if ((lapply(substrate_length, "%%", 2) == 0) == TRUE)
+    stop("substrate_length must be an odd number! I.e. centered sequence
          of ++X++")
   #----------------------------------------------
-  #call trim.seq function and trim sequences:
-  kinase.table[, 2] <-
-    trimSeqs(kinase.table[, 2], 
-              seq.length = substrate.length, 
+  #call trim_seq function and trim sequences:
+  kinase_table[, 2] <-
+    trimSeqs(kinase_table[, 2], 
+              seq_length = substrate_length, 
               verbose = verbose)
-  kinase.table[, 2] <- toupper(kinase.table[, 2])
+  kinase_table[, 2] <- toupper(kinase_table[, 2])
   
   #remove peptides with a certain center character:
-  if (remove.center != FALSE) {
-    half.window <- (substrate.length + 1) / 2
-    center.aa <-
-      substr(kinase.table[, 2], half.window, half.window)
+  if (remove_center != FALSE) {
+    half_window <- (substrate_length + 1) / 2
+    center_aa <-
+      substr(kinase_table[, 2], half_window, half_window)
     if (verbose) {
       message("You have selected to remove",
-              length(which(center.aa == toupper(remove.center))),
+              length(which(center_aa == toupper(remove_center))),
               "peptide sequences for building PWMs that contain a centered 
                letter of:",
-               toupper(remove.center)
+               toupper(remove_center)
              )
     }
-    kinase.table <-
-      kinase.table[center.aa != toupper(remove.center),]
+    kinase_table <-
+      kinase_table[center_aa != toupper(remove_center),]
   }
   
-  kinase.table <- unique(kinase.table)
+  kinase_table <- unique(kinase_table)
   #----------------------------------------------
   
   if (verbose) {
-    message(nrow(kinase.table), "unique kinase:substrate sequences in 
+    message(nrow(kinase_table), "unique kinase:substrate sequences in 
             table provided."
             )
   }
   
   #initialise table for kinase count data
-  kinase.summary <-
-    data.frame("kinase" = unique(as.character(kinase.table[, 1])), "n" = NA)
+  kinase_summary <-
+    data.frame("kinase" = unique(as.character(kinase_table[, 1])), "n" = NA)
 
-  kinase.summary$n <-
-    c(sapply(seq_len(nrow(kinase.summary)), function(i)
-      length(kinase.table[, 1][kinase.table[, 1] == kinase.summary[i, 1]])))
+  kinase_summary$n <-
+    c(sapply(seq_len(nrow(kinase_summary)), function(i)
+      length(kinase_table[, 1][kinase_table[, 1] == kinase_summary[i, 1]])))
   
   #filter the list here which is used to build pwms:
-  kinase.summary <-
-    kinase.summary[kinase.summary$n >= substrates.n, ]
+  kinase_summary <-
+    kinase_summary[kinase_summary$n >= substrates_n, ]
   
   #generate PWM list:
-  pwm.list <-
-    c(lapply(seq_len(nrow(kinase.summary)), function(i)
+  pwm_list <-
+    c(lapply(seq_len(nrow(kinase_summary)), function(i)
       scorePWM(
-        as.character(kinase.table[, 2][kinase.table[, 1] == 
-                                         kinase.summary[i, 1]]),
-        substrate.length = substrate.length,
-        wild.card = wild.card,
+        as.character(kinase_table[, 2][kinase_table[, 1] == 
+                                         kinase_summary[i, 1]]),
+        substrate_length = substrate_length,
+        wild_card = wild_card,
         pseudo = pseudo
       )))
   
-  return(list("pwm" = pwm.list, "kinase" = kinase.summary))
+  return(list("pwm" = pwm_list, "kinase" = kinase_summary))
 }
 
 # this helper function performs the calculations for building the PWMs
 
 scorePWM <-
-  function(input.data,
-           substrate.length,
-           wild.card = "_",
+  function(input_data,
+           substrate_length,
+           wild_card = "_",
            pseudo = 0.01) {
-    #reformat input.data; build a matrix of the sequences (split into individual
-    # AA's) = substrate.length
-    input.data <-
-      data.frame(matrix(unlist(strsplit(input.data , "")) , 
-                        ncol = substrate.length , byrow = TRUE))
-    uniq.AA <-
+    #reformat input_data; build a matrix of the sequences (split into individual
+    # AA's) = substrate_length
+    input_data <-
+      data.frame(matrix(unlist(strsplit(input_data , "")) , 
+                        ncol = substrate_length , byrow = TRUE))
+    uniq_AA <-
       c(
-        wild.card,
+        wild_card,
         "A",
         "C",
         "D",
@@ -165,19 +165,19 @@ scorePWM <-
       )
     #1. Generate PFM:
     pwm <-
-      t(cbind(sapply(seq_len(length(uniq.AA)), function(i)
+      t(cbind(sapply(seq_len(length(uniq_AA)), function(i)
         (
-          sapply(seq_len(ncol(input.data)), function(j)
+          sapply(seq_len(ncol(input_data)), function(j)
             sum(
-              ifelse(as.character(input.data[, j]) == 
-                       as.character(uniq.AA[i]), 1, 0)
+              ifelse(as.character(input_data[, j]) == 
+                       as.character(uniq_AA[i]), 1, 0)
             ))
         ))))
-    rownames(pwm) <- uniq.AA
+    rownames(pwm) <- uniq_AA
     colnames(pwm) <- paste("p", seq_len(ncol(pwm)), sep = "")
     #remove "_"
     #SET AS AN OPTION:
-    pwm <- pwm[!rownames(pwm) %in% c(wild.card),]
+    pwm <- pwm[!rownames(pwm) %in% c(wild_card),]
     #2. PPM calculation
     pwm <- (pwm + pseudo) / (apply(pwm, 2, sum, na.rm = TRUE))
     #3. Generate Position Weight Matrix

@@ -5,11 +5,11 @@
 #'  from buildPWM() and generates p-values for scores. The output of this 
 #'  function is to be used for building the swing metric, the predicted activity
 #'   of kinases.
-#' @param input.data A data.frame of phoshopeptide data. Must contain 4 columns
+#' @param input_data A data.frame of phoshopeptide data. Must contain 4 columns
 #'  and the following format must be adhered to. Column 1 - Annotation, Column 2
 #'   - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
 #'   - p-value [0-1]
-#' @param pwm.in List of PWMs created using buildPWM()
+#' @param pwm_in List of PWMs created using buildPWM()
 #' @param background Option to provide a data.frame of peptides to use as 
 #' background. If providing a background as a table, this must contain two 
 #' columns; Column 1 - Annotation, Column 2 - centered peptide sequence. These 
@@ -17,14 +17,13 @@
 #' input list - background = random. Default: "random"
 #' @param n Number of permutations to perform for generating background. 
 #' Default: "1000"
-#' @param force.trim This function will detect if a peptide sequence is of 
-#' different length to the PWM models generated (provided in pwm.in) and trim 
+#' @param force_trim This function will detect if a peptide sequence is of 
+#' different length to the PWM models generated (provided in pwm_in) and trim 
 #' the input sequences to the same length as the PWM models. If a background is 
 #' provided, this will also be trimmed to the same width as the PWM models. 
 #' Options are: "TRUE, FALSE". Default = FALSE
 #' @param verbose Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 #' "TRUE, FALSE". Default = FALSE
-#' @param threads Number of processing cores to use. Default: "1"
 #'
 #' @examples
 #' ## import data
@@ -34,7 +33,7 @@
 #' ## clean up the annotations
 #' ## sample 100 data points for demonstration
 #' sample_data <- head(example_phosphoproteome, 100)
-#' annotated_data <- cleanAnnotation(input.data = sample_data)
+#' annotated_data <- cleanAnnotation(input_data = sample_data)
 #'
 #' ## build the PWM models:
 #' set.seed(1234)
@@ -47,87 +46,86 @@
 #' ## Using n=10 for demonstration
 #' ## set.seed for reproducibility
 #' set.seed(1234)
-#' substrate_scores <- scoreSequences(input.data = annotated_data,
-#'                                    pwm.in = pwms,
+#' substrate_scores <- scoreSequences(input_data = annotated_data,
+#'                                    pwm_in = pwms,
 #'                                    background = "random",
-#'                                    n = 10,
-#'                                    threads = 4)
+#'                                    n = 10)
 #'
 #' @return A list with 3 elements: 1) PWM-substrate scores: 
-#' substrate_scores$peptide.scores, 2) PWM-substrate p-values: 
-#' substrate_scores$peptide.p and 3) Background used for reproducibility: 
+#' substrate_scores$peptide_scores, 2) PWM-substrate p-values: 
+#' substrate_scores$peptide_p and 3) Background used for reproducibility: 
 #' substrate_scores$background
 #'
 #' @export scoreSequences
 #' @importFrom BiocParallel bplapply
 #' @importFrom BiocParallel MulticoreParam
 
-scoreSequences <- function(input.data = NULL,
-                            pwm.in = NULL,
+
+scoreSequences <- function(input_data = NULL,
+                            pwm_in = NULL,
                             background = "random",
                             n = 1000,
-                            force.trim = FALSE,
-                            verbose = FALSE,
-                            threads = 1) {
+                            force_trim = FALSE,
+                            verbose = FALSE) {
   if (verbose) {
-    message("Scoring,", nrow(input.data),
-        "sequences provided, against", length(pwm.in[[1]]),
+    message("Scoring,", nrow(input_data),
+        "sequences provided, against", length(pwm_in[[1]]),
         "PWM models")
     message("Parameters selected:\n", 
             "n =", n, "\n",
-            "force.trim =", force.trim, "\n",
+            "force_trim =", force_trim, "\n",
             "verbose =", verbose, "\n"
            )
   }
   
   #----------------------------------------------
   #format checks:
-  if (is.null(input.data))
-    stop("input.data not provided; you must provide an input table")
-  if (!is.data.frame(input.data))
-    stop("input.data is not a data.frame; you must provide an
+  if (is.null(input_data))
+    stop("input_data not provided; you must provide an input table")
+  if (!is.data.frame(input_data))
+    stop("input_data is not a data.frame; you must provide an
          input table")
-  if (is.null(pwm.in))
+  if (is.null(pwm_in))
     stop(
-      "pwm.in not provided; you must provide an input table containing
+      "pwm_in not provided; you must provide an input table containing
       computed position weight matrices using buildPWM()"
     )
-  if (!is.list(pwm.in))
+  if (!is.list(pwm_in))
     stop(
-      "pwm.in is not a list format; something has gone wrong. Make sure
+      "pwm_in is not a list format; something has gone wrong. Make sure
       you compute the position weight matrices using buildPWM()"
     )
   #min peptide sequence length of input data
-  min.peptide.seq <- min(nchar(as.character(input.data[, 2])))
+  min_peptide_seq <- min(nchar(as.character(input_data[, 2])))
   #length of PWM models
-  min.pwm.length <- min(sapply(seq_len(length(pwm.in[[1]])), function(X)
-    ncol(data.frame(pwm.in[[1]][X]))))
-  if ((min.peptide.seq > min.pwm.length) & force.trim == FALSE)
+  min_pwm_length <- min(sapply(seq_len(length(pwm_in[[1]])), function(X)
+    ncol(data.frame(pwm_in[[1]][X]))))
+  if ((min_peptide_seq > min_pwm_length) & force_trim == FALSE)
     stop(
       "Centered peptide sequence is greater than length of position weight 
-       matrix. Check data and/or consider using force.trim=TRUE."
+       matrix. Check data and/or consider using force_trim=TRUE."
     )
-  if ((min.peptide.seq < min.pwm.length) & force.trim == FALSE)
+  if ((min_peptide_seq < min_pwm_length) & force_trim == FALSE)
     stop(
       paste(
         "Centered peptide sequence is less than the length of PWMs.
         Rebuild PWM with length of,",
-        min.peptide.seq,
+        min_peptide_seq,
         ",and rerun.",
         sep = ""
       )
     )
-  if ((min.peptide.seq > min.pwm.length) & force.trim == TRUE) {
+  if ((min_peptide_seq > min_pwm_length) & force_trim == TRUE) {
     if (verbose) {
-      message("trimming input.data sequences to minimum PWM length, which is,",
-              min.pwm.length
+      message("trimming input_data sequences to minimum PWM length, which is,",
+              min_pwm_length
               )
     }
     #trim  seqs to the min. sequence length in PWMs
-    input.data[, 2] <-
+    input_data[, 2] <-
       trimSeqs(
-        seqs.to.trim = as.character(input.data[, 2]),
-        seq.length = min.pwm.length,
+        seqs_to_trim = as.character(input_data[, 2]),
+        seq_length = min_pwm_length,
         verbose = verbose
       )
   }
@@ -142,13 +140,13 @@ scoreSequences <- function(input.data = NULL,
     #remove NA's
     background <- background[!is.na(background[, 2]),]
     #check peptide sequence length of background data if provided:
-    min.peptide.seq.bg <- min(nchar(as.character(background[, 2])))
-    if ((min.peptide.seq.bg > min.pwm.length) & force.trim == FALSE)
+    min_peptide_seq_bg <- min(nchar(as.character(background[, 2])))
+    if ((min_peptide_seq_bg > min_pwm_length) & force_trim == FALSE)
       stop(
         "Centered peptide sequence of BACKGROUND is greater than width of
         position weight matrix. Set option to force trim to continue."
       )
-    if ((min.peptide.seq.bg < min.pwm.length) & force.trim == FALSE)
+    if ((min_peptide_seq_bg < min_pwm_length) & force_trim == FALSE)
       stop(
         "Centered peptide sequence if BACKGROUND is less than length of
         position weight matrix. Rebuild PWM with length of X and rerun."
@@ -156,25 +154,25 @@ scoreSequences <- function(input.data = NULL,
     if (n > nrow(background))
       stop("Background provided is smaller than n selected. Reduce n")
     
-    if ((min.peptide.seq.bg > min.pwm.length) & force.trim == FALSE) {
+    if ((min_peptide_seq_bg > min_pwm_length) & force_trim == FALSE) {
       if (verbose) {
         message("trimming BACKGROUND sequences provided to minimum PWM length,
             which is,",
-            min.pwm.length
+            min_pwm_length
             )
       }
       #trim seqs to the min. sequence length inPWMs
       background[, 2] <-
         trimSeqs(
-          seqs.to.trim = as.character(background[, 2]),
-          seq.length = min.pwm.length,
+          seqs_to_trim = as.character(background[, 2]),
+          seq_length = min_pwm_length,
           verbose = verbose
         )
     }
     
   }
   #check "n" not smaller than input dataset
-  if (background == "random" && n > nrow(input.data)) {
+  if (background == "random" && n > nrow(input_data)) {
     stop("n is larger than dataset. Reduce n random sampling")
   }
   
@@ -183,16 +181,15 @@ scoreSequences <- function(input.data = NULL,
   if (verbose) {
     message("[Step1/3] : Scoring peptide sequences against PWMs")
   }
-  peptide.scores <-
-    bplapply(seq_len(length(pwm.in[[2]]$kinase)), function(i)
-      sapply(seq_len(nrow(input.data)), function(j)
-        seqScore(as.character(input.data[j, 2]), pwm.in[[1]][[i]]))
-      , BPPARAM = MulticoreParam(workers = threads))
-  names(peptide.scores) <- pwm.in[[2]]$kinase
-  peptide.scores <-
-    cbind("annotation" = input.data[, 1],
-          "peptide" = input.data[, 2],
-          data.frame(peptide.scores))
+  peptide_scores <-
+    bplapply(seq_len(length(pwm_in[[2]]$kinase)), function(i)
+      sapply(seq_len(nrow(input_data)), function(j)
+        seqScore(as.character(input_data[j, 2]), pwm_in[[1]][[i]])))
+  names(peptide_scores) <- pwm_in[[2]]$kinase
+  peptide_scores <-
+    cbind("annotation" = input_data[, 1],
+          "peptide" = input_data[, 2],
+          data.frame(peptide_scores))
   
   #2. extract background set of size "n"
   # if no background is provided:
@@ -200,9 +197,9 @@ scoreSequences <- function(input.data = NULL,
     if (verbose) {
       message("[Step2/3] : Random background generated from ", n, " peptides")
     }
-    rand.bg <- sample(rownames(peptide.scores), n)
-    background.scores <-
-      peptide.scores[rownames(peptide.scores) %in% rand.bg, ]
+    rand_bg <- sample(rownames(peptide_scores), n)
+    background_scores <-
+      peptide_scores[rownames(peptide_scores) %in% rand_bg, ]
   }
   # or if background is provided
   if (background != "random" && is.data.frame(background)) {
@@ -211,19 +208,17 @@ scoreSequences <- function(input.data = NULL,
               background generated from ", n, " peptides"
               )
     }
-    rand.bg <- sample(rownames(background), n)
-    rand.bg <- background[rownames(background) %in% rand.bg, ]
-    background.scores <-
-      bplapply(seq_len(length(pwm.in[[2]]$kinase)), function(i)
-        sapply(seq_len(nrow(rand.bg)), function(j)
-          seqScore(as.character(rand.bg[j, 2]), pwm.in[[1]][[i]]))
-        , BPPARAM = MulticoreParam(workers = threads))
-    
-    names(background.scores) <- pwm.in[[2]]$kinase
-    background.scores <- cbind(
-      "annotation" = rand.bg[, 1],
-      "peptide" = rand.bg[, 2],
-      data.frame(background.scores)
+    rand_bg <- sample(rownames(background), n)
+    rand_bg <- background[rownames(background) %in% rand_bg, ]
+    background_scores <-
+      bplapply(seq_len(length(pwm_in[[2]]$kinase)), function(i)
+        sapply(seq_len(nrow(rand_bg)), function(j)
+          seqScore(as.character(rand_bg[j, 2]), pwm_in[[1]][[i]])))
+    names(background_scores) <- pwm_in[[2]]$kinase
+    background_scores <- cbind(
+      "annotation" = rand_bg[, 1],
+      "peptide" = rand_bg[, 2],
+      data.frame(background_scores)
     )
     
   }
@@ -234,53 +229,45 @@ scoreSequences <- function(input.data = NULL,
   }
   
   #multi-core:
-  p.table <- bplapply(3:ncol(peptide.scores), function(i)
-    sapply(seq_len(length(peptide.scores[, i])), function(j)
+  p_table <- bplapply(3:ncol(peptide_scores), function(i)
+    sapply(seq_len(length(peptide_scores[, i])), function(j)
       (sum(
         ifelse(
-          as.numeric(background.scores[, i]) >
-            as.numeric(peptide.scores[, i][j]),
-          1,
-          0
-        )
-      ) + 1) /
-        (length(
-          as.numeric(background.scores[, i])
-        ) + 1))
-    , BPPARAM = MulticoreParam(workers = threads))
-  
-  names(p.table) <- colnames(3:ncol(peptide.scores))
-  p.table <- data.frame(peptide.scores[1:2], data.frame(p.table))
-  colnames(p.table) <- gsub("score.", "p.", colnames(peptide.scores))
-  rownames(p.table) <- rownames(peptide.scores)
+          as.numeric(background_scores[, i]) >
+            as.numeric(peptide_scores[, i][j]),
+          1, 0 )) + 1) / (length(as.numeric(background_scores[, i])) + 1)))
+  names(p_table) <- colnames(3:ncol(peptide_scores))
+  p_table <- data.frame(peptide_scores[1:2], data.frame(p_table))
+  colnames(p_table) <- gsub("score_", "p_", colnames(peptide_scores))
+  rownames(p_table) <- rownames(peptide_scores)
   
   if (verbose) {
     message("[Finished]")
   }
   return(
     list(
-      "peptide.scores" = peptide.scores,
-      "peptide.p" = p.table,
-      "background" = background.scores
+      "peptide_scores" = peptide_scores,
+      "peptide_p" = p_table,
+      "background" = background_scores
     )
   )
   }
 
 # This helper function calculates PWM matching scores
-seqScore <- function(input.seq, pwm) {
+seqScore <- function(input_seq, pwm) {
   #vector of letters of sequence to score.
-  input.seq <- unlist(strsplit(input.seq, ""))
+  input_seq <- unlist(strsplit(input_seq, ""))
   #function to score ther matching AA to PWM position:
-  score.AA <- function(i) {
-    if (input.seq[i] == "_") {
+  score_AA <- function(i) {
+    if (input_seq[i] == "_") {
       score = 0
     }
-    if (input.seq[i] != "_") {
-      score <- unlist(pwm[rownames(pwm) == input.seq[i], ][i])
+    if (input_seq[i] != "_") {
+      score <- unlist(pwm[rownames(pwm) == input_seq[i], ][i])
     }
     #return score for each matched AA
     return(score)
   }
-  return(sum(sapply(seq_len(length(input.seq)), function(X)
-    score.AA(X))))
+  return(sum(sapply(seq_len(length(input_seq)), function(X)
+    score_AA(X))))
 }

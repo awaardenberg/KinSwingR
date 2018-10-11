@@ -1,7 +1,7 @@
 ---
 title: 'KinSwingR: Predicting kinase activity from phosphoproteomics data'
 author: "Ashley J. Waardenberg"
-date: 'Last modified: 2018-08-23. Compiled: `r Sys.Date()`'
+date: 'Last modified: 2018-10-11. Compiled: `r Sys.Date()`'
 output:
   html_document:
     highlight: tango
@@ -100,37 +100,46 @@ data(phosphositeplus_human)
 head(example_phosphoproteome)
 
 head(phosphositeplus_human)
+
+
+## sample 100 data points for demonstration
+sample_data <- head(example_phosphoproteome, 1000)
+
+# Random sample for demosntration purposes
+set.seed(1234)
+sample_pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 1000),]
+
 ```
 
 ## Extracting peptides for analysis
-Where the centered peptide sequences (on the phosphosite of interest) are not provided in the format required for ```scoreSequences()``` (see the argument "input.data", in ?scoreSequences), these can be required to be extracted from another column of annotated data. NB. "input.data" table format must contain columns for "annotation", "peptide", "fold-change" and "p-values".
+Where the centered peptide sequences (on the phosphosite of interest) are not provided in the format required for ```scoreSequences()``` (see the argument "input_data", in ?scoreSequences), these can be required to be extracted from another column of annotated data. NB. "input_data" table format must contain columns for "annotation", "peptide", "fold-change" and "p-values".
 
 In the example dataset provided, ```example_phosphoproteome```, peptides have not been extracted into a stand-a-lone peptide column. ```cleanAnnotation()``` is provided as a function to extract peptides from annotation columns and place into the peptide column. 
 
-In the example dataset, ```example_phosphoproteome```, the peptide sequence is the 4th component of the annotation, which corresponds to using the argument ```seq.number = 4``` below, and is seperated by ```|```, which corresponds to the argument ```annotation.delimiter = "|"```. In this case, the annotated data also contains multi-mapped and multi-site information. For example the following annotation ```A1L1I3|Numbl|263;270|PAQPGHVSPTPATTS;SPTPATTSPGEKGEA``` contains two peptides ```PAQPGHVSPTPATTS``` and ```SPTPATTSPGEKGEA``` that map to different sites from the same reference gene ```Numbl```, where the peptides are seperated by ```;```. The annotated data also includes multi-protein mapped (where a peptide could map to more than one protein - not shown) and contains ```X``` instead of ```_``` to indicate sequences that were outside of the length of the coding sequences. KinSwingR requires that these sequences outside of the coding region are marked with ```_``` as deafult and therefore ```replace.search = "X"``` and ```replace.with = "_"``` can be used as arguments in ```cleanAnnotation()``` to replace these. This allows for full flexibility of the input data here, depending of the software used to generate determine the peptide sequences. NB: characters other than ```_``` can be used, but these need to be declared when calling buildPWM and scoreSequences functions later (see their help files).
+In the example dataset, ```example_phosphoproteome```, the peptide sequence is the 4th component of the annotation, which corresponds to using the argument ```seq_number = 4``` below, and is seperated by ```|```, which corresponds to the argument ```annotation_delimiter = "|"```. In this case, the annotated data also contains multi-mapped and multi-site information. For example the following annotation ```A1L1I3|Numbl|263;270|PAQPGHVSPTPATTS;SPTPATTSPGEKGEA``` contains two peptides ```PAQPGHVSPTPATTS``` and ```SPTPATTSPGEKGEA``` that map to different sites from the same reference gene ```Numbl```, where the peptides are seperated by ```;```. The annotated data also includes multi-protein mapped (where a peptide could map to more than one protein - not shown) and contains ```X``` instead of ```_``` to indicate sequences that were outside of the length of the coding sequences. KinSwingR requires that these sequences outside of the coding region are marked with ```_``` as deafult and therefore ```replace_search = "X"``` and ```replace_with = "_"``` can be used as arguments in ```cleanAnnotation()``` to replace these. This allows for full flexibility of the input data here, depending of the software used to generate determine the peptide sequences. NB: characters other than ```_``` can be used, but these need to be declared when calling buildPWM and scoreSequences functions later (see their help files).
 
 Calling ```cleanAnnotation()``` will produce a new table with the unique combinations of peptide sequences extracted from the annotation column into the peptide column:
 
 ```{r echo=TRUE}
-annotated_data <- cleanAnnotation(input.data = example_phosphoproteome, 
-                                   annotation.delimiter = "|",
-                                   multi.protein.delimiter = ":", 
-                                   multi.site.delimiter = ";",
-                                   seq.number = 4, 
-                                   replace = TRUE, 
-                                   replace.search = "X",
-                                   replace.with = "_")
+annotated_data <- cleanAnnotation(input_data = sample_data, 
+                                  annotation_delimiter = "|",
+                                  multi_protein_delimiter = ":", 
+                                  multi_site_delimiter = ";",
+                                  seq_number = 4, 
+                                  replace = TRUE, 
+                                  replace_search = "X",
+                                  replace_with = "_")
 
 head(annotated_data)
 
 ```
 
 ## Build Position Weight Matrices (PWMs)
-The first step to inferring kinase activity, is to build Position Weight Matrices (PWMs) for kinases. This can be done using ```buildPWM()``` for any table containing centered substrate peptide sequences for a list of kinases. The example data ```data(phosphositeplus_human)``` indicates the required format for building PWM models.
+The first step to inferring kinase activity, is to build Position Weight Matrices (PWMs) for kinases. This can be done using ```buildPWM()``` for any table containing centered substrate peptide sequences for a list of kinases. The example data ```data(phosphositeplus_human)``` indicates the required format for building PWM models. Below, for demosntration, we use a subset that was sampled above ```sample_pwm```
 
 To generate the PWMs:
 ```{r echo=TRUE}
-pwms <- buildPWM(phosphositeplus_human)
+pwms <- buildPWM(sample_pwm)
 ```
 
 This will build the PWM models, accessible as ```PWM$pwm``` and list the number of substrate sequences used to build each PWM, accesible as ```PWM$kinase```.
@@ -142,49 +151,43 @@ head(pwms$kinase)
 
 ## Score PWM matches against peptide sequences
 
-Next, we will use the PWM models generated, ```pwms```, to identify matches in the ```annotated.data``` table that was cleaned using ```cleanAnnotation()``` above. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading. ```scoreSequences``` draws a random background by default of size ```n = 1000```. It is recommended to use ```set.seed()``` prior to calling ```scoreSequences``` if you wish to reproduce your results. To access the help file, which explains all the arguments, type ```?scoreSequences``` into the console.
+Next, we will use the PWM models generated, ```pwms```, to identify matches in the ```annotated_data``` table that was cleaned using ```cleanAnnotation()``` above. ``scoreSequences``` supports multi-core processing - see the example below for setting the number of workers to 4. ```scoreSequences``` draws a random background by default of size ```n = 1000```. It is recommended to use ```set.seed()``` prior to calling ```scoreSequences``` if you wish to reproduce your results. To access the help file, which explains all the arguments, type ```?scoreSequences``` into the console.
 
-```{r eval=FALSE}
+```{r echo=TRUE}
+# As an example of control over multi-core processing
+# load BiocParallel library
+library(BiocParallel)
+# finally set/register the number of cores to use
+register(SnowParam(workers = 4))
+
 # set seed for reproducible results
 set.seed(1234)
-scores <- scoreSequences(input.data = annotated_data, 
-                          pwm.in = pwms,
-                          threads = 4)
+scores <- scoreSequences(input_data = annotated_data, 
+                         pwm_in = pwms,
+                         n = 100)
 ```
 
-The outputs of ```scores``` are transparent and accessible. These are however primarily intermediate tables for obtaining swing scores. ```scores``` is a simple list object that contains peptide scores ```(scores$peptide.scores)```, p-values for the peptide scores ```(scores$peptide.p)``` and the background peptides used to score significance ```(scores$background)``` for reproducibility (i.e. the background can saved and reused for reproducibility).
+The outputs of ```scores``` are transparent and accessible. These are however primarily intermediate tables for obtaining swing scores. ```scores``` is a simple list object that contains peptide scores ```(scores$peptide_scores)```, p-values for the peptide scores ```(scores$peptide_p)``` and the background peptides used to score significance ```(scores$background)``` for reproducibility (i.e. the background can saved and reused for reproducibility).
 
 In summary, ```scoreSequences()``` scores each input sequence for a match against all PWMs provided using ```buildPWM()`` and generates p-values for scores. This is effectively one large network of kinase-substrate edges of dimensions kinase, ***k***, by substrate, ***s***.
 
 ## Predict kinase activity using swing()
 
-Having built a kinase-substrate network, ```swing()``` then integrates the kinase-substrate predictions, directionality and significance of phosphopeptide fold change to assess local connectivity (or swing) of kinase-substrate networks. The final score is a normalised score of predicted kinase activity that is weighted for the number of substrates used in the PWM model and number of peptides in the local kinase-substrate network. By default, this will permute the network 1000 times. It is recommended to use ```set.seed()``` prior to calling ```swing``` if you wish to reproduce your results. Using the option ```threads``` is highly recommended for specifying the number of cores to be utilised, for multi-threading.
+Having built a kinase-substrate network, ```swing()``` then integrates the kinase-substrate predictions, directionality and significance of phosphopeptide fold change to assess local connectivity (or swing) of kinase-substrate networks. The final score is a normalised score of predicted kinase activity that is weighted for the number of substrates used in the PWM model and number of peptides in the local kinase-substrate network. By default, this will permute the network 1000 times (here we use 10 for example purposes). It is recommended to use ```set.seed()``` prior to calling ```swing``` if you wish to reproduce your results. ``swing``` supports multi-core processing - see the example below for setting the number of workers to 4.
 
-```{r eval=FALSE}
+```{r echo=TRUE}
+# after loading BiocParallel library, set/register the number of cores to use
+register(SnowParam(workers = 4))
+
 # set seed for reproducible results
 set.seed(1234)
-swing_out <- swing(input.data = annotated_data, 
-                  pwm.in = pwms, 
-                  pwm.scores = scores,
-                  threads = 4)
+swing_out <- swing(input_data = annotated_data, 
+                   pwm_in = pwms, 
+                   pwm_scores = scores,
+                   permutations = 10)
 
 # This will produce two tables, one is a network for use with e.g. Cytoscape and the other is the scores. To access the scores:
-
 head(swing_out$scores)
-##      kinase pos neg all        pk        nk swing.raw   n    swing
-## 35  CSNK2A1  12   6  18 0.6666667 0.3333333 12.590843 590 2.191622
-## 16   CAMK2A  42  24  66 0.6363636 0.3636364 12.078387 189 2.129686
-## 129   PRKG2  34  15  49 0.6938776 0.3061224  8.466674  15 1.693169
-## 58    IKBKB  26  15  41 0.6341463 0.3658537  7.991465  52 1.635735
-## 61     INSR  14   9  23 0.6086957 0.3913043  5.500727  52 1.334701
-## 125   PRKD1  48  36  84 0.5714286 0.4285714  5.364965  67 1.318292
-##       p.greater    p.less
-## 35  0.023976024 0.9710290
-## 16  0.007992008 0.9900100
-## 129 0.000999001 0.9990010
-## 58  0.009990010 0.9840160
-## 61  0.041958042 0.9520480
-## 125 0.052947053 0.9400599
 ```
 
 The outputs of this table indicate the following:
@@ -195,11 +198,11 @@ The outputs of this table indicate the following:
 + ```all```: Total number of regulated kinase substrates
 + ```pk```: Proportion of ***positively*** regulated kinase substrates
 + ```nk```: Proportion of ***negatively*** regulated kinase substrates
-+ ```swing.raw```: Raw - weighted score
++ ```swing_raw```: Raw - weighted score
 + ```n```:  Number of subtrate sequence in ```kinase``` PWM
 + ```swing```: Normalised (Z-score transformed) - weighted score
-+ ```p.greater```: probability of observing a swing score greater than
-+ ```p.less```:  probability of observing a swing score less than
++ ```p_greater```: probability of observing a swing score greater than
++ ```p_less```:  probability of observing a swing score less than
 
 *** See @Kasper2018 and @Waardenberg2018 for methods description ***
 

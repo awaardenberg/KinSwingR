@@ -5,17 +5,17 @@
 \title{Score substrate sequences for matches to kinase Position Weight Matrices 
 (PWMs)}
 \usage{
-scoreSequences(input.data = NULL, pwm.in = NULL,
-  background = "random", n = 1000, force.trim = FALSE,
-  verbose = FALSE, threads = 1)
+scoreSequences(input_data = NULL, pwm_in = NULL,
+  background = "random", n = 1000, force_trim = FALSE,
+  verbose = FALSE)
 }
 \arguments{
-\item{input.data}{A data.frame of phoshopeptide data. Must contain 4 columns
+\item{input_data}{A data.frame of phoshopeptide data. Must contain 4 columns
 and the following format must be adhered to. Column 1 - Annotation, Column 2
  - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
  - p-value [0-1]}
 
-\item{pwm.in}{List of PWMs created using buildPWM()}
+\item{pwm_in}{List of PWMs created using buildPWM()}
 
 \item{background}{Option to provide a data.frame of peptides to use as 
 background. If providing a background as a table, this must contain two 
@@ -26,21 +26,19 @@ input list - background = random. Default: "random"}
 \item{n}{Number of permutations to perform for generating background. 
 Default: "1000"}
 
-\item{force.trim}{This function will detect if a peptide sequence is of 
-different length to the PWM models generated (provided in pwm.in) and trim 
+\item{force_trim}{This function will detect if a peptide sequence is of 
+different length to the PWM models generated (provided in pwm_in) and trim 
 the input sequences to the same length as the PWM models. If a background is 
 provided, this will also be trimmed to the same width as the PWM models. 
 Options are: "TRUE, FALSE". Default = FALSE}
 
 \item{verbose}{Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 "TRUE, FALSE". Default = FALSE}
-
-\item{threads}{Number of processing cores to use. Default: "1"}
 }
 \value{
 A list with 3 elements: 1) PWM-substrate scores: 
-substrate_scores$peptide.scores, 2) PWM-substrate p-values: 
-substrate_scores$peptide.p and 3) Background used for reproducibility: 
+substrate_scores$peptide_scores, 2) PWM-substrate p-values: 
+substrate_scores$peptide_p and 3) Background used for reproducibility: 
 substrate_scores$background
 }
 \description{
@@ -57,7 +55,7 @@ data(phosphositeplus_human)
 ## clean up the annotations
 ## sample 100 data points for demonstration
 sample_data <- head(example_phosphoproteome, 100)
-annotated_data <- cleanAnnotation(input.data = sample_data)
+annotated_data <- cleanAnnotation(input_data = sample_data)
 
 ## build the PWM models:
 set.seed(1234)
@@ -70,10 +68,9 @@ pwms <- buildPWM(sample_pwm)
 ## Using n=10 for demonstration
 ## set.seed for reproducibility
 set.seed(1234)
-substrate_scores <- scoreSequences(input.data = annotated_data,
-                                   pwm.in = pwms,
+substrate_scores <- scoreSequences(input_data = annotated_data,
+                                   pwm_in = pwms,
                                    background = "random",
-                                   n = 10,
-                                   threads = 4)
+                                   n = 10)
 
 }

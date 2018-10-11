@@ -4,28 +4,28 @@
 \alias{swing}
 \title{Swing statistic}
 \usage{
-swing(input.data = NULL, pwm.in = NULL, pwm.scores = NULL,
-  pseudo.count = 1, p.cut.pwm = 0.05, p.cut.fc = 0.05,
-  permutations = 1000, verbose = FALSE, threads = 1)
+swing(input_data = NULL, pwm_in = NULL, pwm_scores = NULL,
+  pseudo_count = 1, p_cut_pwm = 0.05, p_cut_fc = 0.05,
+  permutations = 1000, verbose = FALSE)
 }
 \arguments{
-\item{input.data}{A data.frame of phoshopeptide data. Must contain 4 columns
+\item{input_data}{A data.frame of phoshopeptide data. Must contain 4 columns
 and the following format must be adhered to. Column 1 - Annotation, Column 2
  - centered peptide sequence, Column 3 - Fold Change [-ve to +ve], Column 4 
  - p-value [0-1]. This must be the same dataframe used in scoreSequences()}
 
-\item{pwm.in}{List of PWMs created using buildPWM()}
+\item{pwm_in}{List of PWMs created using buildPWM()}
 
-\item{pwm.scores}{List of PWM-substrate scores created using
-score.seqeuences()}
+\item{pwm_scores}{List of PWM-substrate scores created using
+scoreSequences()}
 
-\item{pseudo.count}{Pseudo-count for avoiding log-zero transformations.
+\item{pseudo_count}{Pseudo-count for avoiding log-zero transformations.
 Default: "1"}
 
-\item{p.cut.pwm}{Significance level for determining a significant
+\item{p_cut_pwm}{Significance level for determining a significant
 kinase-substrate enrichment. Default: "0.05"}
 
-\item{p.cut.fc}{Significance level for determining a significant level of
+\item{p_cut_fc}{Significance level for determining a significant level of
 Fold-change in the phosphoproteomics data. Default: "0.05"}
 
 \item{permutations}{Number of permutations to perform. This will shuffle the 
@@ -35,8 +35,6 @@ kinase-subtrate edges of the network n times. To not perform permutations and
 
 \item{verbose}{Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 "TRUE, FALSE". Default=FALSE}
-
-\item{threads}{Number of processing cores to use. Default: "1"}
 }
 \value{
 A data.table of swing scores
@@ -58,7 +56,7 @@ data(phosphositeplus_human)
 ## clean up the annotations
 ## sample 100 data points for demonstration
 sample_data <- head(example_phosphoproteome, 100)
-annotated_data <- cleanAnnotation(input.data = sample_data)
+annotated_data <- cleanAnnotation(input_data = sample_data)
 
 ## build the PWM models:
 set.seed(1234)
@@ -71,20 +69,18 @@ pwms <- buildPWM(sample_pwm)
 ## Using n = 10 for demonstration
 ## set.seed for reproducibility
 set.seed(1234)
-substrate_scores <- scoreSequences(input.data = annotated_data,
-                                   pwm.in = pwms,
+substrate_scores <- scoreSequences(input_data = annotated_data,
+                                   pwm_in = pwms,
                                    background = "random",
-                                   n = 10,
-                                   threads = 4)
+                                   n = 10)
 
-## Use the pwm.scores and annotated data to predict kinase activity.
+## Use substrate_scores and annotated_data data to predict kinase activity.
 ## This will permute the network node and edges 10 times for demonstration.
 ## set.seed for reproducibility
 set.seed(1234)
-swing_output <- swing(input.data = annotated_data,
-                      pwm.in = pwms,
-                      pwm.scores = substrate_scores,
-                      permutations = 10,
-                      threads = 4)
+swing_output <- swing(input_data = annotated_data,
+                      pwm_in = pwms,
+                      pwm_scores = substrate_scores,
+                      permutations = 10)
 
 }
