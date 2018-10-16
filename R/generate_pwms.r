@@ -129,11 +129,10 @@ buildPWM <- function(kinase_table = NULL,
 
 # this helper function performs the calculations for building the PWMs
 
-scorePWM <-
-  function(input_data,
-           substrate_length,
-           wild_card = "_",
-           pseudo = 0.01) {
+scorePWM <- function(input_data,
+                     substrate_length,
+                     wild_card = "_",
+                     pseudo = 0.01) {
     #reformat input_data; build a matrix of the sequences (split into individual
     # AA's) = substrate_length
     input_data <-
@@ -165,7 +164,7 @@ scorePWM <-
       )
     #1. Generate PFM:
     pwm <-
-      t(cbind(sapply(seq_len(length(uniq_AA)), function(i)
+      t(cbind(sapply(seq_along(uniq_AA), function(i)
         (
           sapply(seq_len(ncol(input_data)), function(j)
             sum(
@@ -175,12 +174,11 @@ scorePWM <-
         ))))
     rownames(pwm) <- uniq_AA
     colnames(pwm) <- paste("p", seq_len(ncol(pwm)), sep = "")
-    #remove "_"
-    #SET AS AN OPTION:
+    #remove wildcard from motif scoring
     pwm <- pwm[!rownames(pwm) %in% c(wild_card),]
     #2. PPM calculation
     pwm <- (pwm + pseudo) / (apply(pwm, 2, sum, na.rm = TRUE))
     #3. Generate Position Weight Matrix
     pwm <- log(pwm / (1 / nrow(pwm)))
-    return(pwm)
-  }
+return(pwm)
+}
