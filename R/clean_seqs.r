@@ -89,7 +89,6 @@ cleanAnnotation <- function(input_data = NULL,
       stop("replace_search AND replace_with MUST both be characters")
     }
   }
-  
   #----------------------------------------------
   colnames(input_data) <- c("annotation", "peptide", "fc", "pval")
   #extract the annotation from the table:
