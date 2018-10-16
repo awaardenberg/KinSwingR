@@ -181,10 +181,12 @@ scoreSequences <- function(input_data = NULL,
   if (verbose) {
     message("[Step1/3] : Scoring peptide sequences against PWMs")
   }
+  
   peptide_scores <-
-    bplapply(seq_len(length(pwm_in[[2]]$kinase)), function(i)
+    bplapply(seq_along(pwm_in[[2]]$kinase), function(i)
       sapply(seq_len(nrow(input_data)), function(j)
         seqScore(as.character(input_data[j, 2]), pwm_in[[1]][[i]])))
+  
   names(peptide_scores) <- pwm_in[[2]]$kinase
   peptide_scores <-
     cbind("annotation" = input_data[, 1],
@@ -210,10 +212,12 @@ scoreSequences <- function(input_data = NULL,
     }
     rand_bg <- sample(rownames(background), n)
     rand_bg <- background[rownames(background) %in% rand_bg, ]
+    
     background_scores <-
-      bplapply(seq_len(length(pwm_in[[2]]$kinase)), function(i)
+      bplapply(seq_along(pwm_in[[2]]$kinase), function(i)
         sapply(seq_len(nrow(rand_bg)), function(j)
           seqScore(as.character(rand_bg[j, 2]), pwm_in[[1]][[i]])))
+    
     names(background_scores) <- pwm_in[[2]]$kinase
     background_scores <- cbind(
       "annotation" = rand_bg[, 1],
@@ -228,7 +232,7 @@ scoreSequences <- function(input_data = NULL,
     message("[Step3/3] : Computing p-values for peptide scores:PWM scores")
   }
   
-  #multi-core:
+  # multi-core
   p_table <- bplapply(3:ncol(peptide_scores), function(i)
     sapply(seq_len(length(peptide_scores[, i])), function(j)
       (sum(
@@ -236,6 +240,7 @@ scoreSequences <- function(input_data = NULL,
           as.numeric(background_scores[, i]) >
             as.numeric(peptide_scores[, i][j]),
           1, 0 )) + 1) / (length(as.numeric(background_scores[, i])) + 1)))
+  
   names(p_table) <- colnames(3:ncol(peptide_scores))
   p_table <- data.frame(peptide_scores[1:2], data.frame(p_table))
   colnames(p_table) <- gsub("score_", "p_", colnames(peptide_scores))
@@ -251,23 +256,17 @@ scoreSequences <- function(input_data = NULL,
       "background" = background_scores
     )
   )
-  }
+}
 
-# This helper function calculates PWM matching scores
+# helper function to calculate PWM match scores (vectorised)
 seqScore <- function(input_seq, pwm) {
-  #vector of letters of sequence to score.
+  # vector of letters of sequence to score
   input_seq <- unlist(strsplit(input_seq, ""))
-  #function to score ther matching AA to PWM position:
-  score_AA <- function(i) {
-    if (input_seq[i] == "_") {
-      score = 0
-    }
-    if (input_seq[i] != "_") {
-      score <- unlist(pwm[rownames(pwm) == input_seq[i], ][i])
-    }
-    #return score for each matched AA
-    return(score)
-  }
-  return(sum(sapply(seq_len(length(input_seq)), function(X)
-    score_AA(X))))
+  idx <- input_seq != "_"
+  ridx <- match(input_seq[idx], rownames(pwm))
+  cidx <- seq_along(input_seq)[idx]
+  # return sum of scores for each matched AA
+  # create a row/column index (which row matches each AA in string)
+  # extracts the corresponding scores and then sums for the total score
+  sum(pwm[cbind(ridx, cidx)])
 }
