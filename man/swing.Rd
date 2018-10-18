@@ -6,7 +6,7 @@
 \usage{
 swing(input_data = NULL, pwm_in = NULL, pwm_scores = NULL,
   pseudo_count = 1, p_cut_pwm = 0.05, p_cut_fc = 0.05,
-  permutations = 1000, verbose = FALSE)
+  permutations = 1000, return_network = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{input_data}{A data.frame of phoshopeptide data. Must contain 4 columns
@@ -19,8 +19,10 @@ and the following format must be adhered to. Column 1 - Annotation, Column 2
 \item{pwm_scores}{List of PWM-substrate scores created using
 scoreSequences()}
 
-\item{pseudo_count}{Pseudo-count for avoiding log-zero transformations.
-Default: "1"}
+\item{pseudo_count}{Pseudo-count acts at two levels. 1) It adds a small
+number to the counts to avoid zero divisions, which also 2) avoids log-zero 
+transformations. Note that this means that pos, neg and all values in the
+output table include the addition of the pseudo-count. Default: "1"}
 
 \item{p_cut_pwm}{Significance level for determining a significant
 kinase-substrate enrichment. Default: "0.05"}
@@ -32,6 +34,9 @@ Fold-change in the phosphoproteomics data. Default: "0.05"}
 kinase-subtrate edges of the network n times. To not perform permutations and
  only generate the scores, set permutations=1 or permutations=FALSE. Default:
   "1000"}
+
+\item{return_network}{Option to return an interaction network for visualising
+in cystoscape. Default = FALSE}
 
 \item{verbose}{Turn verbosity on/off. To turn on, verbose=TRUE. Options are: 
 "TRUE, FALSE". Default=FALSE}
@@ -66,13 +71,13 @@ pwms <- buildPWM(sample_pwm)
 
 ## score the PWM - substrate matches
 ## Using a "random" background, to calculate the p-value of the matches
-## Using n = 10 for demonstration
+## Using n = 100 for demonstration
 ## set.seed for reproducibility
 set.seed(1234)
 substrate_scores <- scoreSequences(input_data = annotated_data,
                                    pwm_in = pwms,
                                    background = "random",
-                                   n = 10)
+                                   n = 100)
 
 ## Use substrate_scores and annotated_data data to predict kinase activity.
 ## This will permute the network node and edges 10 times for demonstration.
