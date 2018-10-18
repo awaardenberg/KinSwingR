@@ -1,7 +1,7 @@
 ---
 title: 'KinSwingR: Predicting kinase activity from phosphoproteomics data'
 author: "Ashley J. Waardenberg"
-date: 'Last modified: 2018-10-11. Compiled: `r Sys.Date()`'
+date: 'Last modified: 2018-10-18. Compiled: `r Sys.Date()`'
 output:
   html_document:
     highlight: tango
@@ -57,17 +57,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-```{r setup, include = FALSE}
-# setting of some global variables
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  #comment = "#>",
-  library(KinSwingR),
-  data(example_phosphoproteome),
-  data(phosphositeplus_human)
-)
-```
-  
+
 # Introduction to KinSwing
 
 KinSwingR aims to predict kinase activity from phoshoproteomics data. It implements the alogorithm described in: @Kasper2018 and @Waardenberg2018 (described in greater detail below). KinSwingR predicts kinase activity by integrating kinase-substrate predictions and the fold change and signficance of change for peptide sequences obtained from phospho-proteomics studies. The score is based on the network connectivity of kinase-substrate networks and is weighted for the number of substrates as well as the size of the local network. P-values are provided to assess the significance of the KinSwing scores, which are determined through random permuations of the overall kinase-substrate network.
@@ -100,7 +90,6 @@ data(phosphositeplus_human)
 head(example_phosphoproteome)
 
 head(phosphositeplus_human)
-
 
 ## sample 100 data points for demonstration
 sample_data <- head(example_phosphoproteome, 1000)
@@ -203,6 +192,8 @@ The outputs of this table indicate the following:
 + ```swing```: Normalised (Z-score transformed) - weighted score
 + ```p_greater```: probability of observing a swing score greater than
 + ```p_less```:  probability of observing a swing score less than
+
+Note that the ``pos``, ``neg`` and ``all`` include a pseudo-count, that is set in ``?swing``, note ``pseudo_count``.
 
 *** See @Kasper2018 and @Waardenberg2018 for methods description ***
 
