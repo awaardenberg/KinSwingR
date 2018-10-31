@@ -138,31 +138,9 @@ scorePWM <- function(input_data,
     input_data <-
       data.frame(matrix(unlist(strsplit(input_data , "")) , 
                         ncol = substrate_length , byrow = TRUE))
-    uniq_AA <-
-      c(
-        wild_card,
-        "A",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "K",
-        "L",
-        "M",
-        "N",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "V",
-        "W",
-        "Y"
-      )
-    #1. Generate PFM:
+    uniq_AA <- c(wild_card, "A", "C", "D", "E", "F", "G", "H", "I", "K", "L", 
+                 "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y")
+    # 1. Build PFM
     pwm <-
       t(cbind(sapply(seq_along(uniq_AA), function(i)
         (
@@ -174,11 +152,20 @@ scorePWM <- function(input_data,
         ))))
     rownames(pwm) <- uniq_AA
     colnames(pwm) <- paste("p", seq_len(ncol(pwm)), sep = "")
-    #remove wildcard from motif scoring
+    # remove wildcard from motif scoring
     pwm <- pwm[!rownames(pwm) %in% c(wild_card),]
-    #2. PPM calculation
-    pwm <- (pwm + pseudo) / (apply(pwm, 2, sum, na.rm = TRUE))
-    #3. Generate Position Weight Matrix
+    # 2. PPM calculation
+    pwm_rownames <- rownames(pwm)
+    pwm_colnames <- colnames(pwm)
+    # addition of pseduo count to avoid log zero    
+    pwm <- pwm + pseudo
+    col_counts <- apply(pwm, 2, sum, na.rm = TRUE)
+    pwm <- sapply(seq_len(ncol(pwm)), function(i) 
+      pwm[,i] / col_counts[i])
+    # carry labels forward
+    rownames(pwm) <- pwm_rownames
+    colnames(pwm) <- pwm_colnames
+    # 3. Calculate Position Weight Matrix
     pwm <- log(pwm / (1 / nrow(pwm)))
 return(pwm)
 }

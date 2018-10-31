@@ -1,7 +1,7 @@
 ---
 title: 'KinSwingR: Predicting kinase activity from phosphoproteomics data'
 author: "Ashley J. Waardenberg"
-date: 'Last modified: 2018-10-18. Compiled: `r Sys.Date()`'
+date: 'Last modified: 2018-10-31. Compiled: `r Sys.Date()`'
 output:
   html_document:
     highlight: tango
@@ -91,11 +91,11 @@ head(example_phosphoproteome)
 
 head(phosphositeplus_human)
 
-## sample 100 data points for demonstration
+## sample 1000 data points for demonstration
 sample_data <- head(example_phosphoproteome, 1000)
 
-# Random sample for demosntration purposes
-set.seed(1234)
+# Random sample for demonstration
+set.seed(1)
 sample_pwm <- phosphositeplus_human[sample(nrow(phosphositeplus_human), 1000),]
 
 ```
