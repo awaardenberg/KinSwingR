@@ -125,27 +125,26 @@ swing <-
       )
     
     #----------------------------------------------
-    #1. binarise the p-values and the fold change:
+    # 1. binarise p-values and fold change
     if (verbose) {
       start_time <- Sys.time()
       message("Start: ", start_time)
       message("[Step1/3] : Calculating Swing Scores")
     }
-    
-    pwm_pval <- pwm_scores[[2]]
-    #binarise the p-values:
+    pwm_pval <- pwm_scores$peptide_p
+    # binarise p-values
     pwm_pval[, 3:ncol(pwm_pval)] <-
       ifelse(pwm_pval[, 3:ncol(pwm_pval)] > p_cut_pwm, 0, 1)
-    #binarise FC:
+    # binarise FC
     input_data[, 3] <- ifelse(as.numeric(input_data[, 3]) > 0, 1, -1)
-    #binarise p-value:
+    # binarise p-value
     input_data[, 4] <-
       ifelse(as.numeric(input_data[, 4]) > p_cut_fc, 0, 1)
-    #compute Sipk statistic (Sipk - see paper):
+    # compute Sipk statistic (Sipk - see paper):
     input_data$Sipk <-
       as.numeric(input_data[, 3]) * as.numeric(input_data[, 4])
     
-    #2.merge the tables together, summarise counts and unique
+    # 2. merge tables, summarise counts and unique
     input_data$annotation <-
       paste(input_data$annotation, input_data$peptide, sep = "::")
     pwm_pval$annotation <-
@@ -153,7 +152,7 @@ swing <-
     data_merge <-
       unique(merge(input_data, pwm_pval, by = "annotation"))
     
-    #3. Swing scores of REAL data.
+    # 3. Swing scores of REAL data.
     swing_out <- swingScore(
       data_merge = data_merge,
       pwm_in = pwm_in,
@@ -161,19 +160,18 @@ swing <-
       pseudo_count = pseudo_count
     )
     
-    #4. permute data and calculate p-values
+    # 4. permute and calculate p-values
     if (permutations != FALSE && permutations > 1) {
       if (verbose) {
         message("[Step2/3] : Permuting Network")
       }
-      
       # obtain permuted column names
       swing_names <- colnames(data_merge)[7:ncol(data_merge)]
       n_permute <- lapply(seq_len(permutations), function(i)
         sample(as.character(swing_names), length(swing_names),replace = FALSE))
       names(n_permute) <- paste("rand", seq_len(permutations), sep = "")
       
-      # calculate swing scores (with permuted names) and return as a vector
+      # calculate swing scores (with permuted names) and return as vector
       swing_permute <- list(bplapply(seq_len(permutations), function(i)
         swingScore(
           data_merge = setNames(data.frame(data_merge),
@@ -184,7 +182,6 @@ swing <-
           pseudo_count = pseudo_count,
           n = i
         )))
-      
       # returns ordered dataframe; order names and merge
       swing_permute_names <- swing_names[order(swing_names)]
       swing_permute <- data.frame("kinase" = swing_permute_names,
@@ -194,7 +191,7 @@ swing <-
       if (verbose) {
         message("[Step3/3] : Calculating p-values")
       }
-      #obtain p-values, two sided
+      # obtain p-values, two sided
       swing_out$p_greater <-
         unlist(bplapply(seq_len(nrow(swing_out)), function(i)
           (sum(
@@ -288,7 +285,7 @@ swingScore <-
     p_n_all$swing <-
       (p_n_all$swing_raw - mean(p_n_all$swing_raw, na.rm = TRUE)) / 
       sd(p_n_all$swing_raw, na.rm = TRUE)
-
+    
     if (permute == "TRUE") {
       p_n_all <- p_n_all$swing_raw
     }
