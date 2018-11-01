@@ -58,6 +58,8 @@ buildPWM <- function(kinase_table = NULL,
          input table")
   #remove NA's
   kinase_table <- kinase_table[!is.na(kinase_table[, 2]),]
+  #remove problematic characters (creates row/column name issues)
+  kinase_table[,1] <- gsub("/", "_", kinase_table[,1])
   
   if (substrate_length < 3)
     stop(
