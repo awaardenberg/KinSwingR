@@ -53,8 +53,9 @@
 #'
 #' @return A list with 3 elements: 1) PWM-substrate scores: 
 #' substrate_scores$peptide_scores, 2) PWM-substrate p-values: 
-#' substrate_scores$peptide_p and 3) Background used for reproducibility: 
-#' substrate_scores$background
+#' substrate_scores$peptide_p 3) Background used for reproducibility: 
+#' substrate_scores$background 4) input_data is returned in the case that it was
+#' trimmed.
 #'
 #' @export scoreSequences
 #' @importFrom BiocParallel bplapply
@@ -253,7 +254,8 @@ scoreSequences <- function(input_data = NULL,
     list(
       "peptide_scores" = peptide_scores,
       "peptide_p" = p_table,
-      "background" = background_scores
+      "background" = background_scores,
+      "input_data" = input_data
     )
   )
 }
