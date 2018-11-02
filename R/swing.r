@@ -211,9 +211,9 @@ swing <-
                          as.numeric(swing_out$swing_raw[i]), 1, 0
                          ), na.rm = TRUE) + 1)
                          / (as.numeric(permutations) + 1)))
+      # order by p-value
+      swing_out <- swing_out[order(swing_out$p_greater),]
     }
-    # order by p-value
-    swing_out <- swing_out[order(swing_out$p_greater),]
     
     if (verbose) {
       message("[FINISHED]\n")
