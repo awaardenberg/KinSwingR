@@ -1,7 +1,11 @@
 Package: KinSwingR
 Type: Package
 Title: KinSwingR: network-based kinase activity prediction
+<<<<<<< HEAD
 Version: 0.99.11
+=======
+Version: 1.1.0
+>>>>>>> upstream/master
 Authors@R: person("Ashley J.", "Waardenberg", email =
     "a.waardenberg@gmail.com", role=c("aut", "cre"))
 Description: KinSwingR integrates phosphosite data derived from mass-spectrometry
