@@ -1,0 +1,6 @@
+Changes in version 1.0.0 (2018-11-01)
++ Submitted to Bioconductor
+
+Changes in version 1.0.1 (2018-11-05)
++ Fixed bugs - matrix division in swing() and labels in buildPWM
++ input_data in outputs of ScoreSequences - to trace trimmed sequences

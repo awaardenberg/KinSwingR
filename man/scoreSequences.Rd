@@ -38,8 +38,9 @@ Options are: "TRUE, FALSE". Default = FALSE}
 \value{
 A list with 3 elements: 1) PWM-substrate scores: 
 substrate_scores$peptide_scores, 2) PWM-substrate p-values: 
-substrate_scores$peptide_p and 3) Background used for reproducibility: 
-substrate_scores$background
+substrate_scores$peptide_p 3) Background used for reproducibility: 
+substrate_scores$background 4) input_data is returned in the case that it was
+trimmed.
 }
 \description{
 Scores each input sequence for a match against all PWMs provided

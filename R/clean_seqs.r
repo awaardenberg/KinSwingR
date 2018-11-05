@@ -69,14 +69,14 @@
 #' @importFrom sqldf sqldf
 
 cleanAnnotation <- function(input_data = NULL,
-                             annotation_delimiter = "|",
-                             multi_protein_delimiter = ":",
-                             multi_site_delimiter = ";",
-                             seq_number = 4,
-                             replace = FALSE,
-                             replace_search = "X",
-                             replace_with = "_",
-                             verbose = FALSE) {
+                            annotation_delimiter = "|",
+                            multi_protein_delimiter = ":",
+                            multi_site_delimiter = ";",
+                            seq_number = 4,
+                            replace = FALSE,
+                            replace_search = "X",
+                            replace_with = "_",
+                            verbose = FALSE) {
   #----------------------------------------------
   #format checks:
   if (is.null(input_data))
@@ -131,10 +131,10 @@ cleanAnnotation <- function(input_data = NULL,
   if (replace == TRUE) {
     if (verbose) {
       message("Replacing all",
-        replace_search,
-        "with",
-        replace_with
-        )
+              replace_search,
+              "with",
+              replace_with
+      )
     }
     data_out$peptide <-
       gsub(replace_search, replace_with, data_out$peptide)
@@ -154,17 +154,17 @@ cleanAnnotation <- function(input_data = NULL,
 # @return Trimmed sequences or HALT
 
 trimSeqs <- function(seqs_to_trim = NULL,
-                      seq_length = NULL,
-                      verbose = FALSE) {
+                     seq_length = NULL,
+                     verbose = FALSE) {
   #check minimum sequence length is compatible
   min_seq <- min(nchar(seqs_to_trim))
   
   if (min_seq < seq_length) {
     stop("You have selected to trim to", seq_length,
-        ", but this is less than minimum sequence length, which is",
-        min_seq, ". Trimming will not be performed. Reduce window size to",
-        min_seq, "or lower to perform trimming"
-        )
+         ", but this is less than minimum sequence length, which is",
+         min_seq, ". Trimming will not be performed. Reduce window size to",
+         min_seq, "or lower to perform trimming"
+    )
   }
   
   #if minimum sequence length is compatible - trim and/or leave same:

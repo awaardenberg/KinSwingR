@@ -53,8 +53,9 @@
 #'
 #' @return A list with 3 elements: 1) PWM-substrate scores: 
 #' substrate_scores$peptide_scores, 2) PWM-substrate p-values: 
-#' substrate_scores$peptide_p and 3) Background used for reproducibility: 
-#' substrate_scores$background
+#' substrate_scores$peptide_p 3) Background used for reproducibility: 
+#' substrate_scores$background 4) input_data is returned in the case that it was
+#' trimmed.
 #'
 #' @export scoreSequences
 #' @importFrom BiocParallel bplapply
@@ -62,20 +63,20 @@
 
 
 scoreSequences <- function(input_data = NULL,
-                            pwm_in = NULL,
-                            background = "random",
-                            n = 1000,
-                            force_trim = FALSE,
-                            verbose = FALSE) {
+                           pwm_in = NULL,
+                           background = "random",
+                           n = 1000,
+                           force_trim = FALSE,
+                           verbose = FALSE) {
   if (verbose) {
     message("Scoring,", nrow(input_data),
-        "sequences provided, against", length(pwm_in[[1]]),
-        "PWM models")
+            "sequences provided, against", length(pwm_in[[1]]),
+            "PWM models")
     message("Parameters selected:\n", 
             "n =", n, "\n",
             "force_trim =", force_trim, "\n",
             "verbose =", verbose, "\n"
-           )
+    )
   }
   
   #----------------------------------------------
@@ -103,7 +104,7 @@ scoreSequences <- function(input_data = NULL,
   if ((min_peptide_seq > min_pwm_length) & force_trim == FALSE)
     stop(
       "Centered peptide sequence is greater than length of position weight 
-       matrix. Check data and/or consider using force_trim=TRUE."
+      matrix. Check data and/or consider using force_trim=TRUE."
     )
   if ((min_peptide_seq < min_pwm_length) & force_trim == FALSE)
     stop(
@@ -119,7 +120,7 @@ scoreSequences <- function(input_data = NULL,
     if (verbose) {
       message("trimming input_data sequences to minimum PWM length, which is,",
               min_pwm_length
-              )
+      )
     }
     #trim  seqs to the min. sequence length in PWMs
     input_data[, 2] <-
@@ -157,9 +158,9 @@ scoreSequences <- function(input_data = NULL,
     if ((min_peptide_seq_bg > min_pwm_length) & force_trim == FALSE) {
       if (verbose) {
         message("trimming BACKGROUND sequences provided to minimum PWM length,
-            which is,",
-            min_pwm_length
-            )
+                which is,",
+                min_pwm_length
+        )
       }
       #trim seqs to the min. sequence length inPWMs
       background[, 2] <-
@@ -170,7 +171,7 @@ scoreSequences <- function(input_data = NULL,
         )
     }
     
-  }
+    }
   #check "n" not smaller than input dataset
   if (background == "random" && n > nrow(input_data)) {
     stop("n is larger than dataset. Reduce n random sampling")
@@ -208,7 +209,7 @@ scoreSequences <- function(input_data = NULL,
     if (verbose) {
       message("[Step2/3] : Background provided; calculating PWM scores against 
               background generated from ", n, " peptides"
-              )
+      )
     }
     rand_bg <- sample(rownames(background), n)
     rand_bg <- background[rownames(background) %in% rand_bg, ]
@@ -225,7 +226,7 @@ scoreSequences <- function(input_data = NULL,
       data.frame(background_scores)
     )
     
-  }
+    }
   
   #3. compute p-values:
   if (verbose) {
@@ -253,10 +254,11 @@ scoreSequences <- function(input_data = NULL,
     list(
       "peptide_scores" = peptide_scores,
       "peptide_p" = p_table,
-      "background" = background_scores
+      "background" = background_scores,
+      "input_data" = input_data
     )
   )
-}
+  }
 
 # helper function to calculate PWM match scores (vectorised)
 seqScore <- function(input_seq, pwm) {

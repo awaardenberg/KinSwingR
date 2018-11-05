@@ -43,12 +43,12 @@
 #' @export buildPWM
 
 buildPWM <- function(kinase_table = NULL,
-                      wild_card = "_",
-                      substrate_length = 15,
-                      substrates_n = 10,
-                      pseudo = 0.01,
-                      remove_center = FALSE,
-                      verbose = FALSE) {
+                     wild_card = "_",
+                     substrate_length = 15,
+                     substrates_n = 10,
+                     pseudo = 0.01,
+                     remove_center = FALSE,
+                     verbose = FALSE) {
   #----------------------------------------------
   #format checks:
   if (is.null(kinase_table))
@@ -58,6 +58,8 @@ buildPWM <- function(kinase_table = NULL,
          input table")
   #remove NA's
   kinase_table <- kinase_table[!is.na(kinase_table[, 2]),]
+  #remove problematic characters (creates row/column name issues)
+  kinase_table[,1] <- gsub("/", "_", kinase_table[,1])
   
   if (substrate_length < 3)
     stop(
@@ -71,8 +73,8 @@ buildPWM <- function(kinase_table = NULL,
   #call trim_seq function and trim sequences:
   kinase_table[, 2] <-
     trimSeqs(kinase_table[, 2], 
-              seq_length = substrate_length, 
-              verbose = verbose)
+             seq_length = substrate_length, 
+             verbose = verbose)
   kinase_table[, 2] <- toupper(kinase_table[, 2])
   
   #remove peptides with a certain center character:
@@ -84,9 +86,9 @@ buildPWM <- function(kinase_table = NULL,
       message("You have selected to remove",
               length(which(center_aa == toupper(remove_center))),
               "peptide sequences for building PWMs that contain a centered 
-               letter of:",
-               toupper(remove_center)
-             )
+              letter of:",
+              toupper(remove_center)
+      )
     }
     kinase_table <-
       kinase_table[center_aa != toupper(remove_center),]
@@ -98,13 +100,13 @@ buildPWM <- function(kinase_table = NULL,
   if (verbose) {
     message(nrow(kinase_table), "unique kinase:substrate sequences in 
             table provided."
-            )
+    )
   }
   
   #initialise table for kinase count data
   kinase_summary <-
     data.frame("kinase" = unique(as.character(kinase_table[, 1])), "n" = NA)
-
+  
   kinase_summary$n <-
     c(sapply(seq_len(nrow(kinase_summary)), function(i)
       length(kinase_table[, 1][kinase_table[, 1] == kinase_summary[i, 1]])))
@@ -125,7 +127,7 @@ buildPWM <- function(kinase_table = NULL,
       )))
   
   return(list("pwm" = pwm_list, "kinase" = kinase_summary))
-}
+  }
 
 # this helper function performs the calculations for building the PWMs
 
@@ -133,52 +135,39 @@ scorePWM <- function(input_data,
                      substrate_length,
                      wild_card = "_",
                      pseudo = 0.01) {
-    #reformat input_data; build a matrix of the sequences (split into individual
-    # AA's) = substrate_length
-    input_data <-
-      data.frame(matrix(unlist(strsplit(input_data , "")) , 
-                        ncol = substrate_length , byrow = TRUE))
-    uniq_AA <-
-      c(
-        wild_card,
-        "A",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "K",
-        "L",
-        "M",
-        "N",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "V",
-        "W",
-        "Y"
-      )
-    #1. Generate PFM:
-    pwm <-
-      t(cbind(sapply(seq_along(uniq_AA), function(i)
-        (
-          sapply(seq_len(ncol(input_data)), function(j)
-            sum(
-              ifelse(as.character(input_data[, j]) == 
-                       as.character(uniq_AA[i]), 1, 0)
-            ))
-        ))))
-    rownames(pwm) <- uniq_AA
-    colnames(pwm) <- paste("p", seq_len(ncol(pwm)), sep = "")
-    #remove wildcard from motif scoring
-    pwm <- pwm[!rownames(pwm) %in% c(wild_card),]
-    #2. PPM calculation
-    pwm <- (pwm + pseudo) / (apply(pwm, 2, sum, na.rm = TRUE))
-    #3. Generate Position Weight Matrix
-    pwm <- log(pwm / (1 / nrow(pwm)))
-return(pwm)
+  #reformat input_data; build a matrix of the sequences (split into individual
+  # AA's) = substrate_length
+  input_data <-
+    data.frame(matrix(unlist(strsplit(input_data , "")) , 
+                      ncol = substrate_length , byrow = TRUE))
+  uniq_AA <- c(wild_card, "A", "C", "D", "E", "F", "G", "H", "I", "K", "L", 
+               "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y")
+  # 1. Build PFM
+  pwm <-
+    t(cbind(sapply(seq_along(uniq_AA), function(i)
+      (
+        sapply(seq_len(ncol(input_data)), function(j)
+          sum(
+            ifelse(as.character(input_data[, j]) == 
+                     as.character(uniq_AA[i]), 1, 0)
+          ))
+      ))))
+  rownames(pwm) <- uniq_AA
+  colnames(pwm) <- paste("p", seq_len(ncol(pwm)), sep = "")
+  # remove wildcard from motif scoring
+  pwm <- pwm[!rownames(pwm) %in% c(wild_card),]
+  # 2. PPM calculation
+  pwm_rownames <- rownames(pwm)
+  pwm_colnames <- colnames(pwm)
+  # addition of pseduo count to avoid log zero    
+  pwm <- pwm + pseudo
+  col_counts <- apply(pwm, 2, sum, na.rm = TRUE)
+  pwm <- sapply(seq_len(ncol(pwm)), function(i) 
+    pwm[,i] / col_counts[i])
+  # carry labels forward
+  rownames(pwm) <- pwm_rownames
+  colnames(pwm) <- pwm_colnames
+  # 3. Calculate Position Weight Matrix
+  pwm <- log(pwm / (1 / nrow(pwm)))
+  return(pwm)
 }
