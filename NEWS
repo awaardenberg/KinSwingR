@@ -4,3 +4,6 @@ Changes in version 1.0.0 (2018-11-01)
 Changes in version 1.0.1 (2018-11-05)
 + Fixed bugs - matrix division in swing() and labels in buildPWM
 + input_data in outputs of ScoreSequences - to trace trimmed sequences
+
+Changes in version 1.0.2 (2018-11-00)
++ Making viewPWM visible
