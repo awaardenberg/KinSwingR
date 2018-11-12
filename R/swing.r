@@ -227,7 +227,7 @@ swing <-
       network <- data.table::melt(data_merge,
                                  id.vars = c("annotation"),
                                  measure.vars = 
-                                 colnames(network[7:ncol(network)]))
+                                 colnames(data_merge[7:ncol(data_merge)]))
       # keep "significant" edges
       network <- network[network$value == 1, ]
       network <- data.frame(
