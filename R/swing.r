@@ -197,10 +197,10 @@ swing <-
           (sum(
             ifelse(
               as.numeric(swing_permute[swing_permute$kinase ==
-                         swing_out$kinase[i], ][2:ncol(swing_permute)]) >
-                         as.numeric(swing_out$swing_raw[i]), 1, 0), 
-                         na.rm = TRUE) + 1)
-                         / (as.numeric(permutations) + 1)))
+                                         swing_out$kinase[i], ][2:ncol(swing_permute)]) >
+                as.numeric(swing_out$swing_raw[i]), 1, 0), 
+            na.rm = TRUE) + 1)
+          / (as.numeric(permutations) + 1)))
       
       swing_out$p_less <-
         unlist(bplapply(seq_len(nrow(swing_out)), function(i)
@@ -209,8 +209,8 @@ swing <-
               as.numeric(swing_permute[swing_permute$kinase ==
                          swing_out$kinase[i], ][2:ncol(swing_permute)]) <
                          as.numeric(swing_out$swing_raw[i]), 1, 0
-                         ), na.rm = TRUE) + 1)
-                         / (as.numeric(permutations) + 1)))
+                        ), na.rm = TRUE) + 1)
+                        / (as.numeric(permutations) + 1)))
       # order by p-value
       swing_out <- swing_out[order(swing_out$p_greater),]
     }
@@ -235,8 +235,8 @@ swing <-
         "target" = as.character(network$annotation)
       )
     }
-return(list("scores" = swing_out, "network" = network))
-}
+    return(list("scores" = swing_out, "network" = network))
+  }
 
 # describeIn swing This helper function performs the swing score calculation
 # no verbose in this helper
@@ -289,5 +289,5 @@ swingScore <-
     if (permute == "TRUE") {
       p_n_all <- p_n_all$swing_raw
     }
-return(p_n_all)
-}
+    return(p_n_all)
+  }

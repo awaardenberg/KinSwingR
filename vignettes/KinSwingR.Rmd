@@ -1,7 +1,7 @@
 ---
 title: 'KinSwingR: Predicting kinase activity from phosphoproteomics data'
 author: "Ashley J. Waardenberg"
-date: 'Last modified: 2018-10-18. Compiled: `r Sys.Date()`'
+date: 'Last modified: 2018-11-09. Compiled: `r Sys.Date()`'
 output:
   html_document:
     highlight: tango
