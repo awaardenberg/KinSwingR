@@ -6,7 +6,7 @@
 \usage{
 viewPWM(pwm_in = NULL, which_pwm = NULL, fontsize = 10,
   view_pwm = FALSE, pseudo = 0.01, convert_PWM = FALSE,
-  correction_factor = NULL)
+  color_scheme = "shapely", correction_factor = NULL)
 }
 \arguments{
 \item{pwm_in}{View a PWM provided using the buildPWM. Default = NULL}
@@ -24,6 +24,9 @@ avoid log zero. Default = 0.01}
 \item{convert_PWM}{pwm_in is a matrix of counts at position. TRUE will 
 convert this matrix to a PWM. Default = FALSE}
 
+\item{color_scheme}{Which color scheme to use for Amino Acid Groups. Options
+are "lesk" or "shapely". Default = "shapely"}
+
 \item{correction_factor}{Number of sequences used to infer the PWM. 
 This can be used where a small number of sequences were used to build the 
 model and included as E_n in the Shannon's Entropy Model. Default = NULL}
@@ -37,7 +40,7 @@ conversion to bits.
 View information content for each position of the PWM.
 Information content is modelled using Shannon's Entropy Model. The maximum
 information content is therefore log2(n), where n is the number of amino
-acids.
+acids. Colors of Amino Acids are in accordance with the Lesk scheme.
 }
 \examples{
 ## Build PWM models from phosphositeplus data with default of minimum
