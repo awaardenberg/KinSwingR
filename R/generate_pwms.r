@@ -159,8 +159,6 @@ scorePWM <- function(input_data,
   # 2. PPM calculation
   pwm_rownames <- rownames(pwm)
   pwm_colnames <- colnames(pwm)
-  # addition of pseduo count to avoid log zero    
-  pwm <- pwm + pseudo
   col_counts <- apply(pwm, 2, sum, na.rm = TRUE)
   pwm <- sapply(seq_len(ncol(pwm)), function(i) 
     pwm[,i] / col_counts[i])
@@ -168,6 +166,7 @@ scorePWM <- function(input_data,
   rownames(pwm) <- pwm_rownames
   colnames(pwm) <- pwm_colnames
   # 3. Calculate Position Weight Matrix
-  pwm <- log(pwm / (1 / nrow(pwm)))
+  # addition of pseduo count to avoid log zero
+  pwm <- log2((pwm / (1 / nrow(pwm)))+pseudo)
 return(pwm)
 }

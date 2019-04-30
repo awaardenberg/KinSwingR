@@ -59,8 +59,6 @@
 #'
 #' @export scoreSequences
 #' @importFrom BiocParallel bplapply
-#' @importFrom BiocParallel MulticoreParam
-
 
 scoreSequences <- function(input_data = NULL,
                            pwm_in = NULL,
