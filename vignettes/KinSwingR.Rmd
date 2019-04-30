@@ -1,7 +1,7 @@
 ---
 title: 'KinSwingR: Predicting kinase activity from phosphoproteomics data'
 author: "Ashley J. Waardenberg"
-date: 'Last modified: 2018-11-09. Compiled: `r Sys.Date()`'
+date: 'Last modified: 2019-04-25. Compiled: `r Sys.Date()`'
 output:
   html_document:
     highlight: tango
@@ -18,40 +18,36 @@ output:
     toc: yes
     toc_depth: '3'
 references:
-- DOI: XX
-  URL: XX
+- DOI: 10.1371/journal.pbio.3000170
+  URL: 'https://doi.org/10.1371/journal.pbio.3000170'
   author:
   - family: Engholm-Keller
-    given: Kasper
+    given: K*
   - family: Waardenberg
-    given: Ashley Jacob
-  container-title: XX
-  id: Kasper2018
-  issue: X
+    given: AJ*
+  - family: Müller 
+    given: JA
+  - family: Wark 
+    given: JR
+  - family: Fernando  
+    given: RN
+  - family: Arthur  
+    given: JA
+  - family: Robinson 
+    given: PJ
+  - family: Dietrich  
+    given: D
+  - family: Schoch  
+    given: S
+  - family: Graham  
+    given: ME
+  id: Kasper2019
   issued:
-    month: X
-    year: 2018
-  page: XX-XX
-  publisher: XX
-  title: in press
+    month: 3
+    year: 2019
+  publisher: PloS Biology
+  title: The temporal profile of activity-dependent presynaptic phospho-signalling reveals long lasting patterns of post-stimulus regulation
   type: article-journal
-  volume: XX
-- DOI: XX
-  URL: XX
-  author:
-  - family: Waardenberg
-    given: Ashley Jacob
-  container-title: XX
-  id: Waardenberg2018
-  issue: X
-  issued:
-    month: X
-    year: 2018
-  page: XX-XX
-  publisher: XX
-  title: in press
-  type: article-journal
-  volume: XX
 vignette: >
   %\VignetteIndexEntry{KinSwingR}
   %\VignetteEngine{knitr::rmarkdown}
@@ -60,7 +56,7 @@ vignette: >
 
 # Introduction to KinSwing
 
-KinSwingR aims to predict kinase activity from phoshoproteomics data. It implements the alogorithm described in: @Kasper2018 and @Waardenberg2018 (described in greater detail below). KinSwingR predicts kinase activity by integrating kinase-substrate predictions and the fold change and signficance of change for peptide sequences obtained from phospho-proteomics studies. The score is based on the network connectivity of kinase-substrate networks and is weighted for the number of substrates as well as the size of the local network. P-values are provided to assess the significance of the KinSwing scores, which are determined through random permuations of the overall kinase-substrate network.
+KinSwingR aims to predict kinase activity from phoshoproteomics data. It implements the alogorithm described in: @Kasper2019 (in greater detail below). KinSwingR predicts kinase activity by integrating kinase-substrate predictions and the fold change and signficance of change for peptide sequences obtained from phospho-proteomics studies. The score is based on the network connectivity of kinase-substrate networks and is weighted for the number of substrates as well as the size of the local network. P-values are provided to assess the significance of the KinSwing scores, which are determined through random permuations of the overall kinase-substrate network.
 
 KinSwingR is implemented as 3 core functions:
 
@@ -143,12 +139,16 @@ To view the list of kinases and the number of sequences used:
 head(pwms$kinase)
 ```
 
-To visualise a motif:
+### Visualising motifs
+
+Motif amino acids are coloured according to their properties. ```color_scheme``` parameter allows options are "lesk" or "shapely" (default). Y-axis is the information content, measured as bits.
+
 ```{r echo=TRUE}
 CAMK2A_pwm <- buildPWM(CAMK2A_example)
 CAMK2A <- viewPWM(CAMK2A_pwm, 
                   which_pwm="CAMK2A",
-                  view_pwm = TRUE)
+                  view_pwm = TRUE,
+                  color_scheme = "shapely")
 ```
 
 
@@ -209,11 +209,11 @@ The outputs of this table indicate the following:
 
 Note that the ``pos``, ``neg`` and ``all`` include a pseudo-count, that is set in ``?swing``, note ``pseudo_count``.
 
-*** See @Kasper2018 and @Waardenberg2018 for methods description ***
+*** See @Kasper2019 for methods description ***
 
 # KinSwingR algorithm
 
-*** For a full description of the KinSwing algorith, see @Kasper2018 and @Waardenberg2018 ***
+*** For a full description of the KinSwing algorithm, see @Kasper2019 ***
 
 **In brief:**
 
@@ -225,7 +225,7 @@ Note that the ``pos``, ``neg`` and ``all`` include a pseudo-count, that is set i
 
 ***Equation 2:*** $R= ∑^N_{n=1}I((S_{score})n* ≥ (S_{score})i)$
 
-```swing()``` integrates phosphosite data and kinase-substrate scores from ```scoreSequences()``` into a network for scoring kinase activity based on local connectivity, $swing_k$, (Equation 3). $swing_k$ is the weighted product of the proportion of positive, $Pos_k$, and negative, $Neg_k$, network edges, determined as the product of a logic function (described here: @Waardenberg2018 and @Kasper2018) given a local network of size, $C_k$, with $n$ substrates for kinase, $K$:
+```swing()``` integrates phosphosite data and kinase-substrate scores from ```scoreSequences()``` into a network for scoring kinase activity based on local connectivity, $swing_k$, (Equation 3). $swing_k$ is the weighted product of the proportion of positive, $Pos_k$, and negative, $Neg_k$, network edges, determined as the product of a logic function (described here: @Kasper2019) given a local network of size, $C_k$, with $n$ substrates for kinase, $K$:
 
 ***Equation 3:*** $swing_k=log_2((Pos_k+c)/(Neg_k+c))*log_2(C_k)*log_2(S_n)$
 
